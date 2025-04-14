@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <!-- Lien Ajouter un ticket -->
+ 
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'create_ticket' %}" class="btn-ticket">Ajouter un ticket</a>
+  </div>
+<h2>Tickets suivis par l'utilisateur</h2>
+
+<!-- Menu déroulant pour choisir l'ordre d'affichage -->
+<form method="get">
+    <label for="order">Trier par :</label>
+    <select name="order" id="order" onchange="this.form.submit()">
+        <option value="date" {% if request.GET.order == "date" or not request.GET.order %}selected{% endif %}>Date (plus récents en premier)</option>
+        <option value="user" {% if request.GET.order == "user" %}selected{% endif %}>Nom d'utilisateur (ordre alphabétique)</option>
+    </select>
+</form>
+<br>
+    <h2>Tickets suivis par l'utilisateur</h2>
+
+    <div class="ticket-list">
+        {% for ticket in page_obj %}
+            <div class="ticket">
+                <h3>
+                    {{ ticket.title }}
+                    <small>({{ ticket.user.username }} – {{ ticket.time_created|date:"d/m/Y H:i" }})</small>
+                </h3>
+
+                <!-- Affichage de l'image du ticket si elle existe -->
+                {% if ticket.image %}
+                    <div class="ticket-image">
+                        <img src="{{ ticket.image.url }}" alt="Image du ticket" style="max-width: 200px; max-height: 150px; object-fit: cover;">
+                    </div>
+                {% endif %}
+
+                <!-- Description du ticket dans une boîte dimensionnée -->
+                <div class="ticket-description-box">
+                    <p class="ticket-description">{{ ticket.description|truncatechars:250 }}</p>
+                </div>
+
+                <!-- Affichage des reviews sous chaque ticket -->
+                <div class="reviews">
+                    {% for review in ticket.review_set.all %}
+                        <div class="review small-text">  <!-- Applique la petite taille de texte à toute la review -->
+
+                            <!-- Séparateur avant la critique -->
+                            <hr class="review-separator">
+
+                            <p><strong>{{ review.headline }} ({{ review.user.username }})</strong></p>
+
+                            <!-- Contenu de la review dans une boîte -->
+                            <div class="review-description-box">
+                                {{ review.body }}
+                            </div>
+
+                            <p><strong>Note :</strong> {{ review.rating }} / 5</p>
+                            <p><strong>Publié le :</strong> {{ review.time_created }}</p>
+
+                            <!-- Boutons Modifier et Effacer seulement si la review a été créée par l'utilisateur loggé -->
+                            <div class="review-buttons">
+                                {% if review.user == request.user %}
+                                    <form action="{% url 'edit_review' review.id %}" method="get">
+                                        <button type="submit" class="button">Modifier</button>
+                                    </form>
+                                    <form action="{% url 'confirm_delete_review' review.id %}" method="get">
+                                        {% csrf_token %}
+                                        <button type="submit" class="button">Effacer</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>Aucune review pour ce ticket.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% empty %}
+            <p>Aucun ticket suivi.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; Première</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Précédente</a>
+            {% endif %}
+            <span class="current">
+                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Suivante</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Dernière &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+{% endblock %}

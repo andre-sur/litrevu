@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Confirmer le blocage</h2>
+  <p>⚠️ Vous êtes sur le point de bloquer <strong>{{ user_to_block.username }}</strong>.</p>
+  <p><strong>Cette action est irréversible.</strong> Voulez-vous vraiment continuer ?</p>
+
+  <form method="POST" action="{% url 'block_user' user_to_block.id %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Bloquer</button>
+    <a href="{% url 'follow_user' %}" class="button">Annuler</a>
+  </form>
+{% endblock %}

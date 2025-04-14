@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Inscription</h1>
+
+        <!-- Formulaire d'inscription -->
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Affichage des erreurs -->
+            {% if messages %}
+                <div class="alert">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Nom d'utilisateur -->
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur :</label>
+                <input type="text" name="username" id="username" required class="form-control">
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="form-group">
+                <label for="password">Mot de passe :</label>
+                <input type="password" name="password" id="password" required class="form-control">
+            </div>
+
+            <!-- Confirmation du mot de passe -->
+            <div class="form-group">
+                <label for="password2">Confirmer le mot de passe :</label>
+                <input type="password" name="password2" id="password2" required class="form-control">
+            </div>
+
+            <!-- Bouton de soumission -->
+            <div class="form-group">
+                <button type="submit" class="button">S'inscrire</button>
+            </div>
+
+        </form>
+
+        <p>Vous avez déjà un compte ? <a href="{% url 'login' %}">Connectez-vous ici</a></p>
+    </div>
+{% endblock %}

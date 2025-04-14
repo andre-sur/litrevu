@@ -1,0 +1,64 @@
+"""
+URL configuration for mon_projet project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.1/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+from django.contrib.auth import views as auth_views
+from django.conf.urls.static import static
+from django.conf import settings
+from django.contrib import admin
+from django.urls import path
+from myapp import views
+from django.views.generic import TemplateView
+
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('hello/', views.hello,name='hello'),
+    path('username/', views.username_form, name='username_form'),
+    path('register/', views.register, name='register'),  
+    path('inscription/', views.inscription, name='inscription'),
+    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),  # Vue de connexion
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),  # Vue de déconnexion
+    path('flux/', views.user_feed, name='user_feed'),
+    path('deconnexion/', views.deconnexion_view, name='deconnexion'),
+    path('follow/', views.follow_user_view, name='follow_user'),
+    path('choose_ticket/', views.choose_ticket, name='choose_ticket'),
+    path('manage_follows/', views.manage_follows, name='manage_follows'),
+    path('reviews/', views.ticket_reviews, name='ticket_reviews'),
+    path('reviews/add/<int:ticket_id>/', views.add_review, name='add_review'),
+    path('edit_ticket/', views.edit_ticket, name='edit_ticket'),
+    path('create_ticket/', views.create_ticket, name='create_ticket'),
+    path('create_review/', views.create_review, name='create_review'),
+    #path('edit_review/', views.edit_review, name='edit_review'),
+    path('edit_review/<int:review_id>/', views.edit_review, name='edit_review'),
+    path('posts/', views.posts, name='posts'),
+    path('confirm_delete_review/<int:review_id>/', views.confirm_delete_review, name='confirm_delete_review'),
+    path('delete_review/<int:review_id>/', views.delete_review, name='delete_review'),
+    path('ticket_selection/', views.ticket_selection, name='ticket_selection'),
+    path('create_ticket/', views.create_ticket, name='create_ticket'),
+    path('add_review/<int:ticket_id>/', views.add_review, name='add_review'),
+    path('reviews/<int:ticket_id>/', views.ticket_reviews, name='ticket_reviews'),
+    path('all_tickets/', views.all_tickets_view, name='all_tickets'),
+    path('block_user/<int:user_id>/', views.block_user_view, name='block_user'),
+    path('confirm_block_user/<int:user_id>/', views.confirm_block_user_view, name='confirm_block_user'),
+
+   
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

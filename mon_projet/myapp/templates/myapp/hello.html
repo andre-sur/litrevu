@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des Reviews{% endblock %}
+
+{% block content %}
+    <h1>Liste des Reviews</h1>
+
+    <!-- Liste des tickets et reviews -->
+    <ul>
+        {% for ticket in tickets %}
+            <div>
+                <h2>{{ ticket.title }}</h2>
+                <p>{{ ticket.description }}</p>
+
+                <h3>Reviews :</h3>
+                <ul>
+                    {% for review in ticket.review_set.all %}
+                        <li>
+                            <strong>{{ review.headline }}</strong>
+                            <p>Rating: {{ review.rating }}</p>
+                            <p>{{ review.body }}</p>
+                            <p>Posté le : {{ review.time_created }}</p>
+                        </li>
+                    {% empty %}
+                        <p>Aucune review pour ce ticket.</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% empty %}
+            <p>Aucun ticket disponible.</p>
+        {% endfor %}
+    </ul>
+{% endblock %}

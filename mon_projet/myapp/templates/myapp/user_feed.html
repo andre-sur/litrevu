@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Fil d'actualités</h1>
+
+    <!-- Affichage des billets -->
+    <div>
+        <h2>Billets récents</h2>
+        {% for ticket in tickets %}
+            <div class="ticket">
+                
+                <h3>{{ ticket.title }} ({{ ticket.user.username }})</h3>
+                <p>{{ ticket.description }}</p>
+                <p><small>Publié le : {{ ticket.time_created }}</small></p>
+
+                <!-- Affichage de l'image du ticket si elle existe -->
+                {% if ticket.image %}
+                    <div class="ticket-image">
+                        <img src="{{ ticket.image.url }}" alt="Image du ticket" style="max-width: 100%; height: auto;">
+                    </div>
+                {% endif %}
+
+                <!-- Affichage des critiques pour chaque billet -->
+                <h4>Critiques :</h4>
+                {% for review in reviews %}
+                    {% if review.ticket == ticket %}
+                        <div class="review small-text"> <!-- Ajoute ici la classe small-text -->
+                            <p><strong>{{ review.user.username }}</strong> a écrit :</p>
+                            <p>{{ review.body }}</p>
+                            <p>Note : {{ review.rating }}/5</p>
+                            <p><small>Publié le : {{ review.time_created }}</small></p>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <p>Aucune critique pour ce billet.</p>
+                {% endfor %}
+            </div>
+        {% empty %}
+            <p>Aucun billet à afficher.</p>
+        {% endfor %}
+    </div>
+
+{% endblock %}

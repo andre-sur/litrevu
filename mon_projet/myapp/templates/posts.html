@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="menu-container">
+    <h2>Menu de gestion des billets et critiques</h2>
+    
+    <!-- Menu avec 4 boutons -->
+    <div class="menu-buttons">
+      <a href="{% url 'edit_ticket' %}" class="btn">Modifier un billet</a>
+      <a href="{% url 'create_ticket' %}" class="btn">Créer un billet</a>
+      <a href="{% url 'create_review' %}" class="btn">Créer une critique</a>
+      <a href="{% url 'edit_review' %}" class="btn">Modifier une critique</a>
+    </div>
+  </div>
+{% endblock %}
+
+{% block styles %}
+  <style>
+    .menu-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .menu-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .btn {
+      padding: 15px 30px;
+      font-size: 18px;
+      text-decoration: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+{% endblock %}

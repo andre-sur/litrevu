@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Modifier un billet</h2>
+
+  <!-- Formulaire pour choisir un billet -->
+  <form method="POST">
+    {% csrf_token %}
+    
+    <label for="ticket_id">Choisissez un billet :</label>
+    <select name="ticket_id" id="ticket_id" required>
+      <option value="">Sélectionner un billet</option>
+      {% for ticket in tickets %}
+        <option value="{{ ticket.id }}" {% if ticket.id == ticket.id %}selected{% endif %}>{{ ticket.title }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <button type="submit">Choisir le billet</button>
+  </form>
+
+  {% if ticket %}
+    <!-- Si un billet est sélectionné, afficher les champs à modifier -->
+    <h3>Modifier le billet : {{ ticket.title }}</h3>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+      
+      <label for="ticket_title">Titre du billet :</label>
+      <input type="text" id="ticket_title" name="ticket_title" value="{{ ticket.title }}" required><br><br>
+      
+      <label for="ticket_description">Description du billet :</label>
+      <textarea id="ticket_description" name="ticket_description" required>{{ ticket.description }}</textarea><br><br>
+
+      <label for="ticket_image">Image du billet (si vous souhaitez en changer) :</label>
+      <input type="file" id="ticket_image" name="ticket_image"><br><br>
+      
+      <button type="submit">Mettre à jour</button>
+    </form>
+  {% endif %}
+
+{% endblock %}

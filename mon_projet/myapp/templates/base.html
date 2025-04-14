@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trame Django</title>
+    
+    <!-- Lien vers le fichier CSS externe -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+    <!-- Bloc pour le CSS spécifique aux pages -->
+    {% block extra_css %}
+    {% endblock %}
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+        }
+        /* Ajouté pour centrer "litrev" */
+        .header .center {
+            flex: 1;
+            text-align: center;
+            font-size: 24px;
+        }
+        .header .links {
+            display: flex;
+            align-items: center;
+        }
+        .header .links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        .header .links a:hover {
+            text-decoration: underline;
+        }
+        /* Pour les messages dynamiques */
+        .message {
+            color: #ff5733;  /* Couleur orange pour les messages */
+            font-weight: bold;
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <!-- Message dynamique à gauche -->
+        <div class="message">{{ message }}</div>
+        <div class="message">
+            {% if request.user.is_authenticated %}
+                <span class="username">Connecté : {{ request.user.username }}</span>
+            {% endif %}
+        </div>
+
+        <!-- "litrev" centré -->
+        <div class="center">litrev</div>
+
+        <!-- Liens à droite -->
+        <div class="links">
+            <a href="{% url 'user_feed' %}">Flux</a>
+            <a href="{% url 'all_tickets' %}">Posts</a>
+            <a href="{% url 'follow_user' %}">Abonnements</a>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Se déconnecter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contenu principal de la page -->
+    <div class="content">
+        {% block content %}
+        <!-- Ici, le contenu spécifique à chaque page sera injecté -->
+        {% endblock %}
+    </div>
+
+    <!-- Inclusion du script JS pour interagir avec les détails des revues -->
+    <script src="{% static 'js/toggle_review_details.js' %}"></script>
+</body>
+</html>

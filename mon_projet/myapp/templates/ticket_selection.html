@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Choisir un ticket et voir les reviews</h2>
+
+    <!-- Formulaire pour sélectionner un propriétaire -->
+    <form method="POST" id="ticket-form">
+        {% csrf_token %}
+        <label for="owner">Choisir un propriétaire:</label>
+        <select name="owner" id="owner" onchange="this.form.submit()">
+            <option value="" disabled {% if not selected_owner %}selected{% endif %}>Sélectionner un propriétaire</option>
+            {% for user in users %}
+                <option value="{{ user.id }}" {% if user.id == selected_owner.id %}selected{% endif %}>{{ user.username }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if selected_owner %}
+        <!-- Formulaire pour sélectionner un ticket de l'utilisateur sélectionné -->
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="owner" value="{{ selected_owner.id }}">
+            <label for="ticket">Choisir un ticket:</label>
+            <select name="ticket" id="ticket" onchange="this.form.submit()">
+                <option value="" disabled {% if not selected_ticket %}selected{% endif %}>Sélectionner un ticket</option>
+                {% for ticket in tickets %}
+                    <option value="{{ ticket.id }}" {% if ticket.id == selected_ticket.id %}selected{% endif %}>{{ ticket.title }}</option>
+                {% empty %}
+                    <option value="" disabled selected>Aucun ticket disponible pour cet utilisateur.</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="button">Valider</button>
+        </form>
+    {% endif %}
+
+    {% if selected_ticket %}
+        <h3>Reviews pour le ticket "{{ selected_ticket.title }}"</h3>
+
+        <!-- Bouton "Ajouter une review" placé sous le titre -->
+        <form action="{% url 'add_review' selected_ticket.id %}" method="get">
+            <button type="submit" class="button">Ajouter une review</button>
+        </form>
+
+        <div class="reviews">
+            {% for review in reviews %}
+                <div class="review">
+                    <p><strong>{{ review.headline }} ({{ review.user.username }})</strong></p>
+
+                    <!-- Conteneur pour les boutons côte à côte -->
+                    <div class="review-buttons">
+                        <!-- Bouton pour afficher/masquer les détails -->
+                        <button class="button toggle-details" data-review-id="{{ review.id }}">Voir les détails</button>
+
+                        <!-- Bouton "Modifier" seulement si l'utilisateur est celui qui a créé la review -->
+                        {% if review.user == request.user %}
+                            <form action="{% url 'edit_review' review.id %}" method="get">
+                                <button type="submit" class="button">Modifier</button>
+                            </form>
+                        {% endif %}
+
+                        <!-- Bouton "Effacer" seulement si l'utilisateur est celui qui a créé la review -->
+                        {% if review.user == request.user %}
+                            <form action="{% url 'confirm_delete_review' review.id %}" method="get" id="delete-form-{{ review.id }}">
+                                {% csrf_token %}
+                                <button type="submit" class="button">Effacer</button>
+                            </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- Détails cachés par défaut -->
+                    <div id="details-{{ review.id }}" class="review-details small-text" style="display:none;">
+                        <p><strong>Description:</strong> {{ review.body }}</p>
+                        <p><strong>Note:</strong> {{ review.rating }} / 5</p>
+                        <p><strong>Publié le :</strong> {{ review.time_created }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Aucune review pour ce ticket.</p>
+            {% endfor %}
+        </div>
+
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Connexion</title>
+</head>
+<body>
+    <h1>Entrez votre nom d'utilisateur et mot de passe</h1>
+
+    <!-- Formulaire pour entrer le nom d'utilisateur -->
+    <form method="POST">
+        {% csrf_token %}
+        <label for="username">Nom d'utilisateur :</label>
+        <input type="text" id="username" name="username" required>
+      
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Se connecter</button>
+    </form>
+
+    <!-- Affichage des messages d'erreur -->
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!-- Bouton pour rediriger vers une autre page d'inscription -->
+    <a href="{% url 'inscription' %}">
+        <button type="button">Inscrivez-vous</button>
+    </a>
+</body>
+</html>

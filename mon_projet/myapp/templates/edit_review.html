@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="review-edit-title">Modifier une revue</h2>
+
+  <div class="review-edit-wrapper">
+    <form method="POST" class="review-edit-form">
+      {% csrf_token %}
+      
+      <!-- Champ Titre -->
+      <label for="headline" class="review-edit-label">Titre de la revue :</label>
+      <input type="text" id="headline" name="headline" value="{{ review.headline }}" required class="review-edit-input-title"><br><br>
+
+      <!-- Champ Description -->
+      <label for="body" class="review-edit-label">Description de la revue :</label><br>
+      <textarea id="body" name="body" required class="review-edit-description-box">{{ review.body }}</textarea><br><br>
+
+      <!-- Champ Note -->
+      <label for="rating" class="review-edit-label">Note de la revue :</label>
+      <input type="number" id="rating" name="rating" value="{{ review.rating }}" min="1" max="5" required class="review-edit-input-number"><br><br>
+
+      <!-- Boutons -->
+      <button type="submit" class="review-edit-button">Mettre à jour</button>
+      <a href="{% url 'all_tickets' %}" class="review-edit-button-cancel">Annuler</a>
+    </form>
+  </div>
+{% endblock %}

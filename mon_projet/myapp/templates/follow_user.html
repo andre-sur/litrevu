@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Mes abonnements</h2>
+
+  <h3>Personnes que vous suivez :</h3>
+  {% if followed_users %}
+    <ul>
+      {% for followed_user in followed_users %}
+        <li>
+          {{ followed_user.username }}
+          <!-- Formulaire pour désabonner -->
+          <form method="POST" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="followed_user_id" value="{{ followed_user.id }}">
+            <button type="submit" name="unfollow">Désabonner</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Vous ne suivez personne.</p>
+  {% endif %}
+
+  <h3>Personnes qui vous suivent :</h3>
+  {% if followers %}
+    <ul>
+      {% for follower in followers %}
+        <li>
+          {{ follower.username }}
+  
+          {% if follower.id in blocked_users_ids %}
+            <span style="color:red; font-weight:bold;">(bloqué(e))</span>
+          {% else %}
+            {% if follower.id %}
+              <form method="GET" action="{% url 'confirm_block_user' follower.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Bloquer</button>
+              </form>
+            {% else %}
+              <span style="color:orange;">(ID manquant)</span>
+            {% endif %}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Personne ne vous suit encore.</p>
+  {% endif %}
+
+  <h3>Ajouter un abonné</h3>
+  
+  {% if users %}
+    <form method="POST">
+      {% csrf_token %}
+      
+      <label for="followed_user_id">Choisissez un utilisateur à suivre :</label>
+      <select name="followed_user" id="followed_user_id">
+        {% for user in users %}
+          <option value="{{ user.id }}">{{ user.username }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit" name="follow">Suivre</button>
+    </form>
+  {% else %}
+    <p>Vous suivez déjà tous les utilisateurs.</p>
+  {% endif %}
+
+  <br>
+  <a href="{% url 'user_feed' %}">Retour à la page d'accueil</a>
+
+{% endblock %}

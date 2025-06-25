@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Ajouter une Review pour le ticket "{{ ticket.title }}"</h2>
+    <h2>Ajouter une Review pour le ticket YYY "{{ ticket.title }}"</h2>
 
     <form method="POST">
         {% csrf_token %}
@@ -35,7 +35,7 @@
         function closePopup() {
             // Masquer le pop-up et rediriger l'utilisateur
             document.getElementById('popup-message').style.display = 'none';
-            window.location.href = "{% url 'user_feed' %}";  // Remplacez 'user_feed' par l'URL de redirection souhaitée
+            window.location.href = "{% url 'user_feed' %}";  
         }
     </script>
 

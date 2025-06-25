@@ -54,13 +54,13 @@ def deconnexion_view(request):
 
 @login_required
 def user_feed(request):
-    # Récupérer les utilisateurs suivis par l'utilisateur connecté
+    #les utilisateurs suivis par l'utilisateur connecté
     followed_users = UserFollows.objects.filter(user=request.user).values_list('followed_user', flat=True)
     
-    # Récupérer tous les billets (tickets) des utilisateurs suivis
+    # tous les billets (tickets) des utilisateurs suivis
     tickets = Ticket.objects.filter(user__in=followed_users).order_by('-time_created')  # tri antichronologique
     
-    # Récupérer les critiques pour ces tickets
+    # les critiques pour ces tickets
     reviews = Review.objects.filter(ticket__in=tickets).order_by('-time_created')  # tri antichronologique
     
     context = {

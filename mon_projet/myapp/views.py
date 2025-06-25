@@ -327,7 +327,7 @@ def confirm_delete_review(request, review_id):
 
     # Si c'est une requête GET, on affiche la confirmation
     if request.method == 'GET':
-        return render(request, 'confirm_delete.html', {'review': review})
+        return render(request, 'confirm_delete_review.html', {'review': review})
 
     # Si la requête est une POST, on supprime la review
     elif request.method == 'POST':

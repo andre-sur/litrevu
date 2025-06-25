@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Confirmation de suppression</h2>
+    <p>Êtes-vous sûr de vouloir effacer le ticket suivant ?</p>
+    
+    <div>
+        <p><strong>{{ review.headline }}</strong> - {{ review.user.username }}</p>
+        <p>{{ review.body }}</p>
+        <p><small>Publié le : {{ review.time_created }}</small></p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="button">Supprimer</button>
+      
+    </form>
+    <form action="{% url 'user_feed' %}" method="get">
+        <button type="submit" class="button">Annuler</button>
+    </form>
+{% endblock %}

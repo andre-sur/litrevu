@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Ajouter une Review pour le ticket "{{ ticket.title }}"</h2>
+
+    <!-- Affichage des informations sur le ticket -->
+    <div class="ticket-info">
+        <h3>{{ ticket.title }}</h3>
+        <p><strong>Description :</strong> {{ ticket.description }}</p>
+        <p><strong>Créé le :</strong> {{ ticket.time_created }}</p>
+    </div>
+
+    <!-- Formulaire pour ajouter une review -->
+    <form method="POST">
+        {% csrf_token %}
+        <label for="headline">Titre de la review :</label>
+        <input type="text" name="headline" id="headline" required><br><br>
+
+        <label for="body">Contenu de la review :</label>
+        <textarea name="body" id="body" required></textarea><br><br>
+
+        <label for="rating">Note (0 à 5) :</label>
+        <input type="number" name="rating" id="rating" min="0" max="5" required><br><br>
+
+        <!-- Boutons "Envoyer" et "Annuler" -->
+        <button type="submit" class="button">Envoyer la review</button>
+        <a href="{% url 'ticket_reviews' %}" class="button">Annuler</a>  <!-- Remplacer 'ticket_reviews' par l'URL de votre choix -->
+
+    </form>
+{% endblock %}

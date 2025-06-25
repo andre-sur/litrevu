@@ -15,11 +15,6 @@ from django.core.paginator import Paginator
 from .models import BlockRelation
 
 
-def hello(request):
-  
-    tickets = Ticket.objects.all()
-    return render(request, 'myapp/hello.html',{'tickets':tickets})
-
 # Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -54,29 +49,8 @@ def register(request):
 
 def deconnexion_view(request):
     logout(request)
-    return redirect('hello')
+    return redirect('login')
 
-def inscription(request):
-    return render(request, 'myapp/inscription.html')
-
-def username_form(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')  # Récupérer le nom d'utilisateur
-        password = request.POST.get('password')  # Récupérer le mot de passe
-
-        # Vérifier si les identifiants sont valides
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            # Si l'utilisateur existe et le mot de passe est correct, connecter l'utilisateur
-            login(request, user)
-            return redirect('user_feed')  # Redirige vers la page d'accueil ou une autre page après connexion
-        else:
-            # Si l'utilisateur n'existe pas ou le mot de passe est incorrect, afficher un message d'erreur
-            messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
-            return render(request, 'myapp/username_form.html')
-
-    return render(request, 'myapp/username_form.html')
 
 @login_required
 def user_feed(request):
@@ -199,47 +173,24 @@ def add_review(request, ticket_id):
     return render(request, 'add_review.html', {'ticket': ticket})
 
 @login_required
-def edit_ticket(request):
+def edit_ticket(request, ticket_id):
+    # Récupérer le billet à éditer, appartenant à l'utilisateur connecté
+    ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
+
     if request.method == 'POST':
-        # Récupérer l'ID du billet sélectionné depuis le formulaire POST
-        ticket_id = request.POST.get('ticket_id')
+        # Mise à jour des champs
+        ticket.title = request.POST.get('ticket_title', ticket.title)
+        ticket.description = request.POST.get('ticket_description', ticket.description)
 
-        if ticket_id:
-            # Récupérer le billet correspondant à l'ID sélectionné et vérifier que c'est le billet de l'utilisateur connecté
-            ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
+        # Si une image est téléchargée
+        if 'ticket_image' in request.FILES:
+            ticket.image = request.FILES['ticket_image']
 
-            # Si les données de modification sont présentes (titre, description, image), les mettre à jour
-            if 'ticket_title' in request.POST:
-                ticket.title = request.POST.get('ticket_title', ticket.title)
-                ticket.description = request.POST.get('ticket_description', ticket.description)
+        ticket.save()
+        return redirect('all_tickets')  # Redirige après édition
 
-                # Si une image est téléchargée, la mettre à jour
-                if 'ticket_image' in request.FILES:
-                    ticket.image = request.FILES['ticket_image']
+    return render(request, 'edit_ticket.html', {'ticket': ticket})
 
-                # Sauvegarder les modifications du billet
-                ticket.save()
-
-                # Après la mise à jour, on peut rediriger vers une autre page, ici on redirige vers la même page
-                return redirect('edit_ticket')  # Ou une autre URL de redirection, comme 'ticket_detail' ou 'home'
-
-        else:
-            return HttpResponse("Aucun billet sélectionné.", status=400)
-
-    # Afficher tous les billets de l'utilisateur connecté dans le menu déroulant
-    tickets = Ticket.objects.filter(user=request.user)
-    ticket = None  # Initialisation à None si aucun billet n'est sélectionné
-
-    # Si un billet a été sélectionné, on récupère le billet correspondant
-    if 'ticket_id' in request.POST:
-        ticket_id = request.POST.get('ticket_id')
-        ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
-
-    return render(request, 'edit_ticket.html', {'tickets': tickets, 'ticket': ticket})
-
-def create_ticket(request):
-    # Logique pour afficher le formulaire de création d'un billet
-    return render(request, 'create_ticket.html')
 
 def create_review(request):
     # Logique pour afficher le formulaire de création d'une critique
@@ -269,11 +220,6 @@ def edit_review(request, review_id):
 
 from django.shortcuts import render
 
-def posts(request):
-    # Logique de la vue, par exemple récupérer des posts depuis la base de données
-    # posts = Post.objects.all()  # Exemple si vous récupérez des posts d'un modèle
-    
-    return render(request, 'posts.html')  # Cela rendra le template 'posts.html'
 
 @login_required
 def ticket_reviews(request):
@@ -308,6 +254,17 @@ def delete_review(request, review_id):
         return redirect('all_tickets')  # Rediriger vers la page all_tickets après la suppression
 
     return render(request, 'confirm_delete_review.html', {'review': review})
+
+@login_required
+def delete_ticket(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+
+    if request.method == 'POST' and request.POST.get('confirm_delete') == 'true':
+        # Supprimer la revue
+        review.delete()
+        return redirect('all_tickets')  # Rediriger vers la page all_tickets après la suppression
+
+    return render(request, 'confirm_delete_ticket.html', {'review': review})
 
 @login_required
 def ticket_selection(request):
@@ -376,7 +333,25 @@ def confirm_delete_review(request, review_id):
     elif request.method == 'POST':
         review.delete()
         return redirect('user_feed')
-    
+
+
+@login_required
+def confirm_delete_ticket(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+
+    # Vérifie si l'utilisateur est celui qui a écrit la review
+    if review.user != request.user:
+        return HttpResponseForbidden("Vous ne pouvez pas supprimer cette critique.")
+
+    # Si c'est une requête GET, on affiche la confirmation
+    if request.method == 'GET':
+        return render(request, 'confirm_delete_ticket.html', {'review': review})
+
+    # Si la requête est une POST, on supprime la review
+    elif request.method == 'POST':
+        review.delete()
+        return redirect('user_feed')
+
 @login_required
 def all_tickets_view(request):
     order = request.GET.get('order', 'date')
@@ -386,7 +361,7 @@ def all_tickets_view(request):
     else:
         tickets = Ticket.objects.all().order_by('-time_created')  # Tri par défaut : antichronologique
 
-    paginator = Paginator(tickets, 10)
+    paginator = Paginator(tickets, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 

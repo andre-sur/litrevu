@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>CREEER Ticket</h2>
+    <h2>CRÉER Ticket</h2>
 
     <!-- Formulaire pour créer un ticket -->
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">  <!-- 👈 Ajout ici -->
         {% csrf_token %}
 
         <label for="title">Titre du ticket :</label>
@@ -15,6 +15,12 @@
         <label for="description">Description du ticket :</label>
         <div class="ticket-description-box">
             <textarea name="description" id="description" required></textarea>
+        </div><br><br>
+
+        <!-- ✅ Champ pour uploader une image -->
+        <label for="image">Image du ticket :</label>
+        <div class="ticket-image-box">
+            <input type="file" name="image" id="image" accept="image/*">
         </div><br><br>
 
         <!-- Boutons "Valider" et "Annuler" -->

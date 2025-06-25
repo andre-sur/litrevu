@@ -1,42 +1,35 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2>Modifier un billet</h2>
+  <h2>Modifier le ticket : {{ ticket.title }}</h2>
 
-  <!-- Formulaire pour choisir un billet -->
-  <form method="POST">
+  <!-- Formulaire de modification du ticket -->
+  <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    
-    <label for="ticket_id">Choisissez un billet :</label>
-    <select name="ticket_id" id="ticket_id" required>
-      <option value="">Sélectionner un billet</option>
-      {% for ticket in tickets %}
-        <option value="{{ ticket.id }}" {% if ticket.id == ticket.id %}selected{% endif %}>{{ ticket.title }}</option>
-      {% endfor %}
-    </select><br><br>
 
-    <button type="submit">Choisir le billet</button>
+    <label for="ticket_title">Titre :</label>
+    <input type="text" id="ticket_title" name="ticket_title" value="{{ ticket.title }}" required><br><br>
+    <div class="ticket_description">
+      <textarea id="ticket_description" name="ticket_description" required>{{ ticket.description }}</textarea>
+  </div>
+ 
+    {% if ticket.image %}
+      <p>Image actuelle :</p>
+      <img src="{{ ticket.image.url }}" alt="Image du ticket" style="max-width: 200px; max-height: 150px;"><br><br>
+    {% endif %}
+
+    <label for="ticket_image">Changer l'image :</label>
+    <input type="file" id="ticket_image" name="ticket_image"><br><br>
+
+    <button type="submit" class="button">Enregistrer les modifications</button>
+    <form action="{% url 'all_tickets' %}" method="get" style="display: inline;">
+      <button type="submit" class="button">Annuler</button>
+  </form>
+   
   </form>
 
-  {% if ticket %}
-    <!-- Si un billet est sélectionné, afficher les champs à modifier -->
-    <h3>Modifier le billet : {{ ticket.title }}</h3>
-    <form method="POST" enctype="multipart/form-data">
-      {% csrf_token %}
-      
-      <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
-      
-      <label for="ticket_title">Titre du billet :</label>
-      <input type="text" id="ticket_title" name="ticket_title" value="{{ ticket.title }}" required><br><br>
-      
-      <label for="ticket_description">Description du billet :</label>
-      <textarea id="ticket_description" name="ticket_description" required>{{ ticket.description }}</textarea><br><br>
+  
 
-      <label for="ticket_image">Image du billet (si vous souhaitez en changer) :</label>
-      <input type="file" id="ticket_image" name="ticket_image"><br><br>
-      
-      <button type="submit">Mettre à jour</button>
-    </form>
-  {% endif %}
-
+  
+  
 {% endblock %}

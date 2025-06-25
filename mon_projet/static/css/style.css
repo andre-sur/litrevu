@@ -125,14 +125,14 @@ a:hover {
 }
 
 .review-separator {
-    margin: 10px 0;
+    margin: 5px 0;
     border: none;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #3a2a2a;
 }
 
 .review.small-text {
     font-size: 12px;
-    margin-left: 20px;
+    margin-left: 50px;
     line-height: 0.9;
     color: #555;
 }
@@ -293,13 +293,13 @@ button:hover {
 
 /* Pour les autres boîtes (description, titres, etc.) */
 .ticket-description-box {
-    width: 100%;
+    width: 80%;
     height: auto;
     background-color: #f9f9f9;
-    border: 1px solid #ccc;
+    border: 2px solid #ccc;
     border-radius: 4px;
-    margin-top: 8px;
-    padding: 10px;
+    margin-top: 2px;
+    padding: 4px;
     box-sizing: border-box;
     text-align: justify;
 }
@@ -309,10 +309,36 @@ button:hover {
     width: 100%;
     min-height: 100px;
     padding: 10px;
-    font-size: 14px;
+    font-size: 13px;
     border: 1px solid #ccc;
     border-radius: 4px;
     resize: vertical;
     overflow: auto;
     white-space: pre-wrap;
+}
+.ticket_description {
+    max-width: 700px; /* ou 100% si tu veux qu’elle s’adapte au parent */
+    width: 100%;
+    background-color: #ece2e2;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.ticket_description textarea {
+    width: 100%; /* prend toute la largeur de la boîte parente */
+    min-height: 150px;
+    max-height: 400px; /* limite haute pour éviter les débordements extrêmes */
+    padding: 10px;
+    font-size: 13px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    resize: none;
+    overflow: auto;
+    white-space: pre-wrap;
+    box-sizing: border-box;
+    display: block;
 }

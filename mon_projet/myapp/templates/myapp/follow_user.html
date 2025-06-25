@@ -32,6 +32,7 @@
           
           {% if follower.id in blocked_users_ids %}
   <span style="color:red; font-weight:bold;">(bloqué(e))</span>
+  <div class="review small-text">Si vous souhaitez débloquer un utilisateur, contactez l'administration du site.</div>
 {% else %}
   <form method="GET" action="{% url 'confirm_block_user' follower.id %}" style="display:inline;">
     {% csrf_token %}

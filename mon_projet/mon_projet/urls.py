@@ -26,27 +26,27 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('hello/', views.hello,name='hello'),
-    path('username/', views.username_form, name='username_form'),
     path('register/', views.register, name='register'),  
-    path('inscription/', views.inscription, name='inscription'),
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),  # Vue de connexion
-    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),  # Vue de déconnexion
     path('flux/', views.user_feed, name='user_feed'),
-    path('deconnexion/', views.deconnexion_view, name='deconnexion'),
+    path('deconnexion/', views.deconnexion_view, name='logout'),
     path('follow/', views.follow_user_view, name='follow_user'),
     path('choose_ticket/', views.choose_ticket, name='choose_ticket'),
     path('manage_follows/', views.manage_follows, name='manage_follows'),
     path('reviews/', views.ticket_reviews, name='ticket_reviews'),
     path('reviews/add/<int:ticket_id>/', views.add_review, name='add_review'),
-    path('edit_ticket/', views.edit_ticket, name='edit_ticket'),
+    path('edit_ticket/<int:ticket_id>/', views.edit_ticket, name='edit_ticket'),
     path('create_ticket/', views.create_ticket, name='create_ticket'),
     path('create_review/', views.create_review, name='create_review'),
     #path('edit_review/', views.edit_review, name='edit_review'),
     path('edit_review/<int:review_id>/', views.edit_review, name='edit_review'),
-    path('posts/', views.posts, name='posts'),
     path('confirm_delete_review/<int:review_id>/', views.confirm_delete_review, name='confirm_delete_review'),
     path('delete_review/<int:review_id>/', views.delete_review, name='delete_review'),
+
+    path('confirm_delete_ticket/<int:review_id>/', views.confirm_delete_ticket, name='confirm_delete_ticket'),
+    path('delete_ticket/<int:review_id>/', views.delete_ticket, name='delete_ticket'),
+
+
     path('ticket_selection/', views.ticket_selection, name='ticket_selection'),
     path('create_ticket/', views.create_ticket, name='create_ticket'),
     path('add_review/<int:ticket_id>/', views.add_review, name='add_review'),

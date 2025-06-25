@@ -5,11 +5,17 @@
 
     <form method="POST">
         {% csrf_token %}
-        <label for="headline">Titre de la review :</label>
-        <input type="text" name="headline" id="headline" required><br><br>
+      
+
+        <label for="headline">Titre de la critique :</label>
+        <div class="ticket-title-box">
+            <input type="text" name="headline" id="headline" required>
+        </div><br><br>
 
         <label for="body">Contenu de la review :</label>
-        <textarea name="body" id="body" required></textarea><br><br>
+        <div class="ticket-description-box">
+            <textarea name="body" id="body" required></textarea>
+        </div><br><br>
 
         <label for="rating">Note (0 à 5) :</label>
         <input type="number" name="rating" id="rating" min="0" max="5" required><br><br>

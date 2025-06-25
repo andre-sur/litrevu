@@ -16,7 +16,8 @@
                 <!-- Affichage de l'image du ticket si elle existe -->
                 {% if ticket.image %}
                     <div class="ticket-image">
-                        <img src="{{ ticket.image.url }}" alt="Image du ticket" style="max-width: 100%; height: auto;">
+                        <img src="{{ ticket.image.url }}" alt="Image du ticket" style="max-width: 20%; height: auto;">
+                       
                     </div>
                 {% endif %}
 
@@ -32,7 +33,7 @@
                         </div>
                     {% endif %}
                 {% empty %}
-                    <p>Aucune critique pour ce billet.</p>
+                <div class="review small-text">Aucune critique pour ce billet.</div>
                 {% endfor %}
             </div>
         {% empty %}

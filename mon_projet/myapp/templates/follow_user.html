@@ -4,43 +4,41 @@
   <h2>Mes abonnements</h2>
 
   <h3>Personnes que vous suivez :</h3>
-  {% if followed_users %}
-    <ul>
-      {% for followed_user in followed_users %}
-        <li>
-          {{ followed_user.username }}
-          <!-- Formulaire pour désabonner -->
-          <form method="POST" style="display:inline;">
-            {% csrf_token %}
-            <input type="hidden" name="followed_user_id" value="{{ followed_user.id }}">
-            <button type="submit" name="unfollow">Désabonner</button>
-          </form>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>Vous ne suivez personne.</p>
-  {% endif %}
+{% if followed_users %}
+  <ul>
+    {% for followed_user in followed_users %}
+      <li>
+        {{ followed_user.username }}
+        <!-- Formulaire pour désabonner -->
+        <form method="POST" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" name="followed_user_id" value="{{ followed_user.id }}">
+          <button type="submit" name="unfollow">Désabonner</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Vous ne suivez personne.</p>
+{% endif %}
 
   <h3>Personnes qui vous suivent :</h3>
+ 
   {% if followers %}
     <ul>
       {% for follower in followers %}
         <li>
           {{ follower.username }}
-  
+          
           {% if follower.id in blocked_users_ids %}
-            <span style="color:red; font-weight:bold;">(bloqué(e))</span>
-          {% else %}
-            {% if follower.id %}
-              <form method="GET" action="{% url 'confirm_block_user' follower.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit">Bloquer</button>
-              </form>
-            {% else %}
-              <span style="color:orange;">(ID manquant)</span>
-            {% endif %}
-          {% endif %}
+  <span style="color:red; font-weight:bold;">(bloqué(e))</span>
+  <div class="review small-text">Si vous souhaitez débloquer un utilisateur, contactez l'administration du site.</div>
+{% else %}
+  <form method="GET" action="{% url 'confirm_block_user' follower.id %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Bloquer</button>
+  </form>
+{% endif %}
         </li>
       {% endfor %}
     </ul>

@@ -179,9 +179,7 @@ def edit_ticket(request, ticket_id):
     return render(request, 'edit_ticket.html', {'ticket': ticket})
 
 
-def create_review(request):
-    # Logique pour afficher le formulaire de création d'une critique
-    return render(request, 'create_review.html')
+
 
 @login_required
 def edit_review(request, review_id):

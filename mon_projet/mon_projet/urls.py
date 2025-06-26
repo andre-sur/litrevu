@@ -32,7 +32,6 @@ urlpatterns = [
     path('deconnexion/', views.deconnexion_view, name='logout'),
     path('follow/', views.follow_user_view, name='follow_user'),
     path('manage_follows/', views.manage_follows, name='manage_follows'),
-    path('reviews/', views.ticket_reviews, name='ticket_reviews'),
     path('reviews/add/<int:ticket_id>/', views.add_review, name='add_review'),
     path('edit_ticket/<int:ticket_id>/', views.edit_ticket, name='edit_ticket'),
     path('create_ticket/', views.create_ticket, name='create_ticket'),

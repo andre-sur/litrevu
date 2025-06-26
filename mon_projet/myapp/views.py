@@ -208,29 +208,6 @@ from django.shortcuts import render
 
 
 @login_required
-def ticket_reviews(request):
-    # Récupérer tous les tickets, peu importe leur propriétaire
-    tickets = Ticket.objects.all()
-    selected_ticket = None
-    reviews = []
-
-    # Si le formulaire est soumis (POST)
-    if request.method == 'POST':
-        ticket_id = request.POST.get('ticket')
-        # Récupérer le ticket sélectionné et ses reviews
-        selected_ticket = get_object_or_404(Ticket, id=ticket_id)
-        reviews = Review.objects.filter(ticket=selected_ticket)
-
-    return render(request, 'ticket_reviews.html', {
-        'tickets': tickets,
-        'selected_ticket': selected_ticket,
-        'reviews': reviews
-    })
-
-
-
-
-@login_required
 def delete_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
 

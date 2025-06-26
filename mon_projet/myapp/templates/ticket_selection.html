@@ -37,7 +37,7 @@
         <h3>Reviews pour le ticket "{{ selected_ticket.title }}"</h3>
 
         <!-- Bouton "Ajouter une review" placé sous le titre -->
-        <form action="{% url 'add_review' selected_ticket.id %}" method="get">
+        <form action="{% url 'create_review' selected_ticket.id %}" method="get">
             <button type="submit" class="button">Ajouter une review</button>
         </form>
 

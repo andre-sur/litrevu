@@ -133,7 +133,7 @@ def manage_follows(request):
 
 
 @login_required
-def add_review(request, ticket_id):
+def create_review(request, ticket_id):
     ticket = Ticket.objects.get(id=ticket_id)
 
     if request.method == 'POST':
@@ -151,12 +151,12 @@ def add_review(request, ticket_id):
         )
 
         # Passer un message de succès à la page de confirmation
-        return render(request, 'add_review.html', {
+        return render(request, 'create_review.html', {
             'ticket': ticket,
             'message': 'Vous avez ajouté une critique'
         })
 
-    return render(request, 'add_review.html', {'ticket': ticket})
+    return render(request, 'create_review.html', {'ticket': ticket})
 
 @login_required
 def edit_ticket(request, ticket_id):
@@ -276,7 +276,7 @@ def create_ticket(request):
         )
 
         # Rediriger vers la page de la review du ticket créé
-        return redirect('add_review', ticket_id=ticket.id)
+        return redirect('create_review', ticket_id=ticket.id)
 
     return render(request, 'create_ticket.html')
 

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Ajouter une Review pour le ticket YYY "{{ ticket.title }}"</h2>
+    <h2>Ajouter une Review pour le ticket : "{{ ticket.title }}"</h2>
 
     <form method="POST">
         {% csrf_token %}
@@ -20,7 +20,7 @@
         <label for="rating">Note (0 à 5) :</label>
         <input type="number" name="rating" id="rating" min="0" max="5" required><br><br>
 
-        <button type="submit" class="button">Envoyer la review</button>
+        <button type="submit" class="button">Envoyer la critique</button>
     </form>
 
     {% if message %}

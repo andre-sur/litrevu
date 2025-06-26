@@ -134,14 +134,15 @@ def manage_follows(request):
 
 @login_required
 def create_review(request, ticket_id):
-    ticket = Ticket.objects.get(id=ticket_id)
+    
+    ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == 'POST':
         headline = request.POST.get('headline')
         body = request.POST.get('body')
         rating = request.POST.get('rating')
 
-        # Créer la review
+        # Créer la critique
         Review.objects.create(
             headline=headline,
             body=body,
@@ -150,10 +151,10 @@ def create_review(request, ticket_id):
             ticket=ticket
         )
 
-        # Passer un message de succès à la page de confirmation
+        # Confirmer via un message
         return render(request, 'create_review.html', {
             'ticket': ticket,
-            'message': 'Vous avez ajouté une critique'
+            'message': 'Vous avez ajouté une critique à ce ticket.'
         })
 
     return render(request, 'create_review.html', {'ticket': ticket})

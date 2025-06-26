@@ -43,12 +43,7 @@ urlpatterns = [
 
     path('confirm_delete_ticket/<int:ticket_id>/', views.confirm_delete_ticket, name='confirm_delete_ticket'),
     path('delete_ticket/<int:review_id>/', views.delete_ticket, name='delete_ticket'),
-
-
-    path('ticket_selection/', views.ticket_selection, name='ticket_selection'),
     path('create_ticket/', views.create_ticket, name='create_ticket'),
-    #path('add_review/<int:ticket_id>/', views.add_review, name='add_review'),
-    #path('reviews/<int:ticket_id>/', views.ticket_reviews, name='ticket_reviews'),
     path('all_tickets/', views.all_tickets_view, name='all_tickets'),
     path('block_user/<int:user_id>/', views.block_user_view, name='block_user'),
     path('confirm_block_user/<int:user_id>/', views.confirm_block_user_view, name='confirm_block_user'),

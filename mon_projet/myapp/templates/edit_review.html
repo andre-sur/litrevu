@@ -1,27 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="review-edit-title">Modifier une revue</h2>
+  <h2>Modifier la critique : {{ review.headline }}</h2>
 
-  <div class="review-edit-wrapper">
-    <form method="POST" class="review-edit-form">
-      {% csrf_token %}
-      
-      <!-- Champ Titre -->
-      <label for="headline" class="review-edit-label">Titre de la revue :</label>
-      <input type="text" id="headline" name="headline" value="{{ review.headline }}" required class="review-edit-input-title"><br><br>
+  <!-- Formulaire de modification de la critique -->
+  <form method="POST">
+    {% csrf_token %}
 
-      <!-- Champ Description -->
-      <label for="body" class="review-edit-label">Description de la revue :</label><br>
-      <textarea id="body" name="body" required class="review-edit-description-box">{{ review.body }}</textarea><br><br>
+    <label for="headline">Titre :</label>
+    <input type="text" id="headline" name="headline" value="{{ review.headline }}" required><br><br>
 
-      <!-- Champ Note -->
-      <label for="rating" class="review-edit-label">Note de la revue :</label>
-      <input type="number" id="rating" name="rating" value="{{ review.rating }}" min="1" max="5" required class="review-edit-input-number"><br><br>
+    <label for="body">Description :</label>
+    <div class="ticket_description">
+      <textarea id="body" name="body" required>{{ review.body }}</textarea>
+    </div><br>
 
-      <!-- Boutons -->
-      <button type="submit" class="review-edit-button">Mettre à jour</button>
-      <a href="{% url 'all_tickets' %}" class="review-edit-button-cancel">Annuler</a>
+    <label for="rating">Note (1 à 5) :</label>
+    <input type="number" id="rating" name="rating" value="{{ review.rating }}" min="1" max="5" required><br><br>
+
+    <button type="submit" class="button">Enregistrer les modifications</button>
+
+    <form action="{% url 'all_tickets' %}" method="get" style="display: inline;">
+      <button type="submit" class="button">Annuler</button>
     </form>
-  </div>
+  </form>
 {% endblock %}

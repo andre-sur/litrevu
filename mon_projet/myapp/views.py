@@ -108,20 +108,6 @@ def follow_user(request):
 
     return render(request, 'follow_user.html', context)
 
-@login_required
-def choose_ticket(request):
-    # Récupérer tous les billets créés par l'utilisateur connecté
-    tickets = Ticket.objects.filter(user=request.user)
-
-    if request.method == 'POST':
-        # Récupérer l'ID du ticket sélectionné
-        ticket_id = request.POST.get('ticket')
-        ticket = Ticket.objects.get(id=ticket_id)  # Trouver le ticket correspondant
-
-        # Passer le ticket sélectionné au template
-        return render(request, 'ticket_detail.html', {'ticket': ticket})
-
-    return render(request, 'choose_ticket.html', {'tickets': tickets})
 
 @login_required
 def manage_follows(request):

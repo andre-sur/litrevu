@@ -31,7 +31,6 @@ urlpatterns = [
     path('flux/', views.user_feed, name='user_feed'),
     path('deconnexion/', views.deconnexion_view, name='logout'),
     path('follow/', views.follow_user_view, name='follow_user'),
-    path('choose_ticket/', views.choose_ticket, name='choose_ticket'),
     path('manage_follows/', views.manage_follows, name='manage_follows'),
     path('reviews/', views.ticket_reviews, name='ticket_reviews'),
     path('reviews/add/<int:ticket_id>/', views.add_review, name='add_review'),

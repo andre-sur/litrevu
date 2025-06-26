@@ -322,20 +322,23 @@ def confirm_delete_review(request, review_id):
 
 
 @login_required
-def confirm_delete_ticket(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
+def confirm_delete_ticket(request, ticket_id):
+    ticket = get_object_or_404(Review, id=ticket_id)
+    print("review.user:", ticket.user)
+    print("request.user:", ticket.user)
+    print("Égalité :", ticket.user == request.user)
 
     # Vérifie si l'utilisateur est celui qui a écrit la review
-    if review.user != request.user:
+    if ticket.user != request.user:
         return HttpResponseForbidden("Vous ne pouvez pas supprimer cette critique.")
 
     # Si c'est une requête GET, on affiche la confirmation
     if request.method == 'GET':
-        return render(request, 'confirm_delete_ticket.html', {'review': review})
+        return render(request, 'confirm_delete_ticket.html', {'ticket': ticket})
 
     # Si la requête est une POST, on supprime la review
     elif request.method == 'POST':
-        review.delete()
+        ticket.delete()
         return redirect('user_feed')
 
 @login_required

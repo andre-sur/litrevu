@@ -38,13 +38,13 @@
 
         <!-- 🔘 Boutons associés au ticket -->
         <div class="ticket-buttons" style="margin: 10px 0;">
-          <!-- Bouton "Ajouter une review" toujours visible -->
+          <!-- Bouton "Ajouter une critique visible pour tout le monde -->
           <form action="{% url 'add_review' ticket.id %}" method="get" style="display: inline;">
-            <button type="submit" class="button">Ajouter une review</button>
+            <button type="submit" class="button">Ajouter une critique</button>
           </form>
 
           {% if ticket.user == request.user %}
-            <!-- Ces boutons sont réservés au créateur du ticket -->
+            <!-- Seul le créateur peut modifier ou supprimer -->
             <form action="{% url 'edit_ticket' ticket.id %}" method="get" style="display: inline;">
               <button type="submit" class="button">Modifier ce ticket</button>
             </form>

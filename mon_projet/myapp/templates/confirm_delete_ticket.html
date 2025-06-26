@@ -5,9 +5,9 @@
     <p>Êtes-vous sûr de vouloir effacer le ticket suivant ?</p>
     
     <div>
-        <p><strong>{{ review.headline }}</strong> - {{ review.user.username }}</p>
-        <p>{{ review.body }}</p>
-        <p><small>Publié le : {{ review.time_created }}</small></p>
+        <p><strong>{{ ticket.title }}</strong> - {{ ticket.user.username }}</p>
+        <p>{{ ticket.description }}</p>
+        <p><small>Publié le : {{ ticket.time_created }}</small></p>
     </div>
 
     <form method="POST">

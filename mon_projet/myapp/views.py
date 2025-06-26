@@ -242,15 +242,15 @@ def delete_review(request, review_id):
     return render(request, 'confirm_delete_review.html', {'review': review})
 
 @login_required
-def delete_ticket(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
+def delete_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == 'POST' and request.POST.get('confirm_delete') == 'true':
-        # Supprimer la revue
-        review.delete()
-        return redirect('all_tickets')  # Rediriger vers la page all_tickets après la suppression
+        # Supprimer le ticket
+        ticket.delete()
+        return redirect('all_tickets')  # Redirection vers page principale
 
-    return render(request, 'confirm_delete_ticket.html', {'review': review})
+    return render(request, 'confirm_delete_ticket.html', {'ticket': ticket})
 
 @login_required
 def ticket_selection(request):
@@ -323,8 +323,8 @@ def confirm_delete_review(request, review_id):
 
 @login_required
 def confirm_delete_ticket(request, ticket_id):
-    ticket = get_object_or_404(Review, id=ticket_id)
-    print("review.user:", ticket.user)
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    print("ticket.user:", ticket.user)
     print("request.user:", ticket.user)
     print("Égalité :", ticket.user == request.user)
 

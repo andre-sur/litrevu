@@ -42,7 +42,7 @@ urlpatterns = [
     path('confirm_delete_review/<int:review_id>/', views.confirm_delete_review, name='confirm_delete_review'),
     path('delete_review/<int:review_id>/', views.delete_review, name='delete_review'),
 
-    path('confirm_delete_ticket/<int:review_id>/', views.confirm_delete_ticket, name='confirm_delete_ticket'),
+    path('confirm_delete_ticket/<int:ticket_id>/', views.confirm_delete_ticket, name='confirm_delete_ticket'),
     path('delete_ticket/<int:review_id>/', views.delete_ticket, name='delete_ticket'),
 
 

@@ -68,7 +68,7 @@ def user_feed(request):
     reviews = Review.objects.filter(ticket__in=tickets).order_by('-time_created')
 
     context = {
-        'page_obj': page_obj,  # ← paginé !
+        'page_obj': page_obj,  # ← paginé 
         'reviews': reviews
     }
 
@@ -111,29 +111,6 @@ def follow_user(request):
     }
 
     return render(request, 'follow_user.html', context)
-
-
-@login_required
-def manage_follows(request):
-    # Récupérer les utilisateurs que l'utilisateur connecté suit
-    followed_users = User.objects.filter(followed_by__user=request.user)
-
-    if request.method == 'POST':
-        # Désabonnement (suppression de la relation de suivi)
-        followed_user_id = request.POST.get('followed_user_id')
-        followed_user = User.objects.get(id=followed_user_id)
-
-        # Vérifier si la relation existe et la supprimer
-        try:
-            user_follow = UserFollows.objects.get(user=request.user, followed_user=followed_user)
-            user_follow.delete()
-            messages.success(request, f"Vous avez désabonné {followed_user.username}.")
-        except UserFollows.DoesNotExist:
-            messages.error(request, "Relation de suivi non trouvée.")
-
-        return redirect('manage_follows')  # Rediriger après avoir supprimé le suivi
-
-    return render(request, 'manage_follows.html', {'followed_users': followed_users})
 
 
 @login_required
@@ -208,7 +185,6 @@ def edit_review(request, review_id):
 from django.shortcuts import render
 
 
-
 @login_required
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -219,36 +195,6 @@ def delete_ticket(request, ticket_id):
         return redirect('all_tickets')  # Redirection vers page principale
 
     return render(request, 'confirm_delete_ticket.html', {'ticket': ticket})
-
-@login_required
-def ticket_selection(request):
-    selected_owner = None
-    selected_ticket = None
-    tickets = []
-    reviews = []
-
-    # Vérifier si l'utilisateur a soumis le formulaire de sélection du propriétaire ou du ticket
-    if request.method == 'POST':
-        # Si un propriétaire est sélectionné
-        if 'owner' in request.POST:
-            selected_owner = User.objects.get(id=request.POST['owner'])
-            tickets = Ticket.objects.filter(user=selected_owner)  # Récupérer les tickets de l'utilisateur sélectionné
-            
-            # Si un ticket est également sélectionné, récupérer les reviews associées
-            if 'ticket' in request.POST:
-                selected_ticket = Ticket.objects.get(id=request.POST['ticket'])
-                reviews = Review.objects.filter(ticket=selected_ticket)
-
-    # Récupérer tous les utilisateurs
-    users = User.objects.all()
-
-    return render(request, 'ticket_selection.html', {
-        'users': users,
-        'selected_owner': selected_owner,
-        'tickets': tickets,
-        'selected_ticket': selected_ticket,
-        'reviews': reviews,
-    })
 
 @login_required
 def create_ticket(request):

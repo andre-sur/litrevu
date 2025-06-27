@@ -3,42 +3,65 @@
 {% block content %}
     <h1>Fil d'actualités</h1>
 
-    <!-- Affichage des billets -->
     <div>
         <h2>Billets récents</h2>
-        {% for ticket in tickets %}
+        <p>Nombre de tickets dans page_obj : {{ page_obj.paginator.count }}</p>
+<p>Tickets dans cette page : {{ page_obj|length }}</p>
+
+        {% for ticket in page_obj %}
             <div class="ticket">
-                
                 <h3>{{ ticket.title }} ({{ ticket.user.username }})</h3>
                 <p>{{ ticket.description }}</p>
-                <p><small>Publié le : {{ ticket.time_created }}</small></p>
+                <p><small>Publié le : {{ ticket.time_created|date:"d/m/Y H:i" }}</small></p>
 
-                <!-- Affichage de l'image du ticket si elle existe -->
                 {% if ticket.image %}
                     <div class="ticket-image">
                         <img src="{{ ticket.image.url }}" alt="Image du ticket" style="max-width: 20%; height: auto;">
-                       
                     </div>
                 {% endif %}
 
-                <!-- Affichage des critiques pour chaque billet -->
+                <!-- Affichage des critiques liées au ticket -->
                 <h4>Critiques :</h4>
-                {% for review in reviews %}
-                    {% if review.ticket == ticket %}
-                        <div class="review small-text"> <!-- Ajoute ici la classe small-text -->
-                            <p><strong>{{ review.user.username }}</strong> a écrit :</p>
-                            <p>{{ review.body }}</p>
-                            <p>Note : {{ review.rating }}/5</p>
-                            <p><small>Publié le : {{ review.time_created }}</small></p>
-                        </div>
-                    {% endif %}
-                {% empty %}
-                <div class="review small-text">Aucune critique pour ce billet.</div>
-                {% endfor %}
+                {% with ticket_reviews=reviews|dictsort:"-time_created" %}
+                    {% with found=False %}
+                        {% for review in ticket_reviews %}
+                            {% if review.ticket.id == ticket.id %}
+                                {% if not found %}{% with found=True %}{% endwith %}{% endif %}
+                                <div class="review small-text">
+                                    <p><strong>{{ review.user.username }}</strong> a écrit :</p>
+                                    <p>{{ review.body }}</p>
+                                    <p>Note : {{ review.rating }}/5</p>
+                                    <p><small>Publié le : {{ review.time_created|date:"d/m/Y H:i" }}</small></p>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% if not found %}
+                            <div class="review small-text">Aucune critique pour ce billet.</div>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
             </div>
         {% empty %}
             <p>Aucun billet à afficher.</p>
         {% endfor %}
     </div>
 
+    <!-- Pagination -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; Première</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Précédente</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Suivante</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Dernière &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
 {% endblock %}

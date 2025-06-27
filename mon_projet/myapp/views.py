@@ -51,23 +51,27 @@ def deconnexion_view(request):
     logout(request)
     return redirect('login')
 
-
 @login_required
 def user_feed(request):
-    #les utilisateurs suivis par l'utilisateur connecté
+    # Les utilisateurs suivis
     followed_users = UserFollows.objects.filter(user=request.user).values_list('followed_user', flat=True)
-    
-    # tous les billets (tickets) des utilisateurs suivis
-    tickets = Ticket.objects.filter(user__in=followed_users).order_by('-time_created')  # tri antichronologique
-    
-    # les critiques pour ces tickets
-    reviews = Review.objects.filter(ticket__in=tickets).order_by('-time_created')  # tri antichronologique
-    
+
+    # Tous les tickets des utilisateurs suivis
+    tickets = Ticket.objects.filter(user__in=followed_users).order_by('-time_created')
+
+    # Pagination des tickets
+    paginator = Paginator(tickets, 5)  # ← nombre de tickets par page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Les critiques associées à ces tickets
+    reviews = Review.objects.filter(ticket__in=tickets).order_by('-time_created')
+
     context = {
-        'tickets': tickets,
+        'page_obj': page_obj,  # ← paginé !
         'reviews': reviews
     }
-    
+
     return render(request, 'myapp/user_feed.html', context)
 
 @login_required

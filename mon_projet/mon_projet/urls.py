@@ -22,8 +22,6 @@ from django.urls import path
 from myapp import views
 from django.views.generic import TemplateView
 
-
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', views.register, name='register'),  
@@ -31,16 +29,11 @@ urlpatterns = [
     path('flux/', views.user_feed, name='user_feed'),
     path('deconnexion/', views.deconnexion_view, name='logout'),
     path('follow/', views.follow_user_view, name='follow_user'),
-    #path('manage_follows/', views.manage_follows, name='manage_follows'),
     path('reviews/add/<int:ticket_id>/', views.create_review, name='create_review'),
     path('edit_ticket/<int:ticket_id>/', views.edit_ticket, name='edit_ticket'),
     path('create_ticket/', views.create_ticket, name='create_ticket'),
-    #path('create_review/', views.create_review, name='create_review'),
-    #path('edit_review/', views.edit_review, name='edit_review'),
     path('edit_review/<int:review_id>/', views.edit_review, name='edit_review'),
     path('confirm_delete_review/<int:review_id>/', views.confirm_delete_review, name='confirm_delete_review'),
-    path('delete_review/<int:review_id>/', views.delete_review, name='delete_review'),
-
     path('confirm_delete_ticket/<int:ticket_id>/', views.confirm_delete_ticket, name='confirm_delete_ticket'),
     path('delete_ticket/<int:review_id>/', views.delete_ticket, name='delete_ticket'),
     path('create_ticket/', views.create_ticket, name='create_ticket'),
@@ -48,7 +41,6 @@ urlpatterns = [
     path('block_user/<int:user_id>/', views.block_user_view, name='block_user'),
     path('confirm_block_user/<int:user_id>/', views.confirm_block_user_view, name='confirm_block_user'),
 
-   
 ]
 
 if settings.DEBUG:

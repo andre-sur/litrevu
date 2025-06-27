@@ -183,8 +183,6 @@ def edit_ticket(request, ticket_id):
     return render(request, 'edit_ticket.html', {'ticket': ticket})
 
 
-
-
 @login_required
 def edit_review(request, review_id):
     # Récupérer la revue à modifier
@@ -210,16 +208,6 @@ def edit_review(request, review_id):
 from django.shortcuts import render
 
 
-@login_required
-def delete_review(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
-
-    if request.method == 'POST' and request.POST.get('confirm_delete') == 'true':
-        # Supprimer la revue
-        review.delete()
-        return redirect('all_tickets')  # Rediriger vers la page all_tickets après la suppression
-
-    return render(request, 'confirm_delete_review.html', {'review': review})
 
 @login_required
 def delete_ticket(request, ticket_id):

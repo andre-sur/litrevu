@@ -5,8 +5,6 @@
 
     <div>
         <h2>Billets récents</h2>
-        <p>Nombre de tickets dans page_obj : {{ page_obj.paginator.count }}</p>
-<p>Tickets dans cette page : {{ page_obj|length }}</p>
 
         {% for ticket in page_obj %}
             <div class="ticket">

@@ -14,7 +14,6 @@ from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 from .models import BlockRelation
 
-
 # Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -72,46 +71,7 @@ def user_feed(request):
         'reviews': reviews
     }
 
-    return render(request, 'myapp/user_feed.html', context)
-
-@login_required
-def follow_user(request):
-    # Récupérer les utilisateurs suivis par l'utilisateur connecté
-    followed_users = UserFollows.objects.filter(user=request.user).select_related('followed_user')
-    followed_users = [uf.followed_user for uf in followed_users]
-
-    # Récupérer les utilisateurs qui suivent l'utilisateur connecté
-    followers = UserFollows.objects.filter(followed_user=request.user).select_related('user')
-    followers = [uf.user for uf in followers]
-
-    # Récupérer tous les utilisateurs sauf celui connecté
-    users = User.objects.exclude(id=request.user.id)
-
-    if request.method == "POST":
-        if "unfollow" in request.POST:
-            # Désabonnement : retirer la relation d'abonnement
-            followed_user_id = request.POST.get("followed_user_id")
-            followed_user = User.objects.get(id=followed_user_id)
-            UserFollows.objects.filter(user=request.user, followed_user=followed_user).delete()
-        elif "follow" in request.POST:
-            # Abonnement : ajouter une relation d'abonnement
-            followed_user_id = request.POST.get("followed_user")
-            followed_user = User.objects.get(id=followed_user_id)
-            # S'assurer que l'utilisateur ne suit pas déjà cet utilisateur
-            if not UserFollows.objects.filter(user=request.user, followed_user=followed_user).exists():
-                UserFollows.objects.create(user=request.user, followed_user=followed_user)
-
-        # Rediriger après le traitement du formulaire
-        return redirect('follow_user')
-
-    context = {
-        'followed_users': followed_users,
-        'followers': followers,
-        'users': users,
-    }
-
-    return render(request, 'follow_user.html', context)
-
+    return render(request, 'user_feed.html', context)
 
 @login_required
 def create_review(request, ticket_id):

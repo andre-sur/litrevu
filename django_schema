@@ -1,0 +1,39 @@
+digraph DjangoModelSchema {
+	rankdir=LR
+	User [label="User
+(id, username, ...)" fillcolor="#a0c4ff" shape=box style=filled]
+	Ticket [label="Ticket
+- id (PK)
+- title
+- description
+- user_id (FK)
+- image
+- time_created
+" shape=box]
+	Review [label="Review
+- id (PK)
+- headline
+- ticket_id (FK)
+- user_id (FK)
+- rating
+- body
+- time_created
+" shape=box]
+	UserFollows [label="UserFollows
+- id (PK)
+- user_id (FK)
+- followed_user_id (FK)
+" shape=box]
+	BlockRelation [label="BlockRelation
+- id (PK)
+- blocker_id (FK)
+- blocked_id (FK)
+" shape=box]
+	Ticket -> User [label=user_id arrowhead=crow color=blue]
+	Review -> Ticket [label=ticket_id arrowhead=crow color=blue]
+	Review -> User [label=user_id arrowhead=crow color=blue]
+	UserFollows -> User [label=user_id arrowhead=crow color=blue]
+	UserFollows -> User [label=followed_user_id arrowhead=crow color=blue]
+	BlockRelation -> User [label=blocker_id arrowhead=crow color=blue]
+	BlockRelation -> User [label=blocked_id arrowhead=crow color=blue]
+}

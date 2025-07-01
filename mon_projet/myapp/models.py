@@ -3,7 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator
 
 class Ticket(models.Model):
-    title = models.CharField(max_length=128)  # Mettre unique=True au lieu de primary_key
+    title = models.CharField(max_length=128)  
     description = models.TextField(max_length=2048, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
@@ -36,7 +36,7 @@ class UserFollows(models.Model):
     # L'utilisateur qui suit un autre utilisateur
     user = models.ForeignKey(
         User,  # Lien vers le modèle utilisateur (User ou CustomUser)
-        on_delete=models.CASCADE,  # Si l'utilisateur est supprimé, la relation de suivi est supprimée
+        on_delete=models.CASCADE,  # Si l'utilisateur est supprimé, relation suivi supprimée
         related_name='following'  # Nom de la relation inverse pour l'utilisateur qui suit
     )
     

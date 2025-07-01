@@ -14,7 +14,7 @@ from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 from .models import BlockRelation
 
-# Create your views here.
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -27,17 +27,17 @@ def register(request):
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
 
-        # Vérifier si le nom d'utilisateur existe déjà
+        # name exist?
         if User.objects.filter(username=username).exists():
             messages.error(request, "Ce nom d'utilisateur est déjà pris.")
             return redirect('register')
 
-        # Vérifier si les mots de passe correspondent
+        # password is ok ?
         if password != password2:
             messages.error(request, "Les mots de passe ne correspondent pas.")
             return redirect('register')
 
-        # Créer l'utilisateur
+        # create user
         user = User.objects.create_user(username=username, password=password)
         user.save()
 
@@ -59,7 +59,7 @@ def user_feed(request):
     tickets = Ticket.objects.filter(user__in=followed_users).order_by('-time_created')
 
     # Pagination des tickets
-    paginator = Paginator(tickets, 5)  # ← nombre de tickets par page
+    paginator = Paginator(tickets, 5)  # nombre de tickets par page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -67,7 +67,7 @@ def user_feed(request):
     reviews = Review.objects.filter(ticket__in=tickets).order_by('-time_created')
 
     context = {
-        'page_obj': page_obj,  # ← paginé 
+        'page_obj': page_obj,  # paginé 
         'reviews': reviews
     }
 
@@ -83,7 +83,7 @@ def create_review(request, ticket_id):
         body = request.POST.get('body')
         rating = request.POST.get('rating')
 
-        # Créer la critique
+        # create review/critique
         Review.objects.create(
             headline=headline,
             body=body,

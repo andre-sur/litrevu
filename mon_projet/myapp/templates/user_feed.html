@@ -4,62 +4,36 @@
     <h1>Fil d'actualités</h1>
 
     <div>
-        <h2>Billets récents</h2>
+        {% if tickets_with_reviews %}
+            {% for item in tickets_with_reviews %}
+                <div class="ticket">
+                    <h3>{{ item.ticket.title }} ({{ item.ticket.user.username }})</h3>
+                    <p>{{ item.ticket.description }}</p>
+                    <p><small>Publié le : {{ item.ticket.time_created|date:"d/m/Y H:i" }}</small></p>
 
-        {% for ticket in page_obj %}
-            <div class="ticket">
-                <h3>{{ ticket.title }} ({{ ticket.user.username }})</h3>
-                <p>{{ ticket.description }}</p>
-                <p><small>Publié le : {{ ticket.time_created|date:"d/m/Y H:i" }}</small></p>
+                    {% if item.ticket.image %}
+                        <div class="ticket-image">
+                            <img src="{{ item.ticket.image.url }}" alt="Image du ticket" style="max-width: 20%; height: auto;">
+                        </div>
+                    {% endif %}
 
-                {% if ticket.image %}
-                    <div class="ticket-image">
-                        <img src="{{ ticket.image.url }}" alt="Image du ticket" style="max-width: 20%; height: auto;">
-                    </div>
-                {% endif %}
-
-                <!-- Affichage des critiques liées au ticket -->
-                <h4>Critiques :</h4>
-                {% with ticket_reviews=reviews|dictsort:"-time_created" %}
-                    {% with found=False %}
-                        {% for review in ticket_reviews %}
-                            {% if review.ticket.id == ticket.id %}
-                                {% if not found %}{% with found=True %}{% endwith %}{% endif %}
-                                <div class="review small-text">
-                                    <p><strong>{{ review.user.username }}</strong> a écrit :</p>
-                                    <p>{{ review.body }}</p>
-                                    <p>Note : {{ review.rating }}/5</p>
-                                    <p><small>Publié le : {{ review.time_created|date:"d/m/Y H:i" }}</small></p>
-                                </div>
-                            {% endif %}
+                    <h4>Critiques :</h4>
+                    {% if item.reviews %}
+                        {% for review in item.reviews %}
+                            <div class="review small-text">
+                                <p><strong>{{ review.user.username }}</strong> a écrit :</p>
+                                <p>{{ review.body }}</p>
+                                <p>Note : {{ review.rating }}/5</p>
+                                <p><small>Publié le : {{ review.time_created|date:"d/m/Y H:i" }}</small></p>
+                            </div>
                         {% endfor %}
-                        {% if not found %}
-                            <div class="review small-text">Aucune critique pour ce billet.</div>
-                        {% endif %}
-                    {% endwith %}
-                {% endwith %}
-            </div>
-        {% empty %}
+                    {% else %}
+                        <div class="review small-text">Aucune critique pour ce billet.</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
             <p>Aucun billet à afficher.</p>
-        {% endfor %}
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">&laquo; Première</a>
-                <a href="?page={{ page_obj.previous_page_number }}">Précédente</a>
-            {% endif %}
-
-            <span class="current">
-                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}.
-            </span>
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">Suivante</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">Dernière &raquo;</a>
-            {% endif %}
-        </span>
+        {% endif %}
     </div>
 {% endblock %}

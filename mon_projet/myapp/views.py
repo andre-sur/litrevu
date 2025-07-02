@@ -13,13 +13,14 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 from .models import BlockRelation
+from itertools import chain
+from operator import attrgetter
 
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
-
 
 def register(request):
     if request.method == 'POST':
@@ -52,23 +53,33 @@ def deconnexion_view(request):
 
 @login_required
 def user_feed(request):
-    # Les utilisateurs suivis
-    followed_users = UserFollows.objects.filter(user=request.user).values_list('followed_user', flat=True)
+    # IDs des utilisateurs suivis + soi-même
+    followed_users_ids = list(
+        UserFollows.objects.filter(user=request.user).values_list('followed_user', flat=True)
+    )
+    followed_users_ids.append(request.user.id)
 
-    # Tous les tickets des utilisateurs suivis
-    tickets = Ticket.objects.filter(user__in=followed_users).order_by('-time_created')
+    # Récupérer tous les tickets des utilisateurs suivis
+    tickets = Ticket.objects.filter(user__in=followed_users_ids).order_by('-time_created')
 
-    # Pagination des tickets
-    paginator = Paginator(tickets, 5)  # nombre de tickets par page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    # Les critiques associées à ces tickets
+    # Récupérer toutes les critiques liées à ces tickets
     reviews = Review.objects.filter(ticket__in=tickets).order_by('-time_created')
 
+    # Créer un dictionnaire {ticket_id: [liste de reviews]}
+    reviews_dict = {}
+    for review in reviews:
+        reviews_dict.setdefault(review.ticket_id, []).append(review)
+
+    # Préparer une liste combinée {ticket, reviews}
+    tickets_with_reviews = []
+    for ticket in tickets:
+        tickets_with_reviews.append({
+            'ticket': ticket,
+            'reviews': reviews_dict.get(ticket.id, [])
+        })
+
     context = {
-        'page_obj': page_obj,  # paginé 
-        'reviews': reviews
+        'tickets_with_reviews': tickets_with_reviews,
     }
 
     return render(request, 'user_feed.html', context)

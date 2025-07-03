@@ -1,44 +1,35 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib.auth import logout, authenticate, login
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Review, Ticket, UserFollows
 from django.contrib.auth.models import User
-from .forms import CustomUserCreationForm
-from django.contrib.auth.hashers import make_password 
-from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
-from .models import BlockRelation
+from .models import Review, Ticket, UserFollows, BlockRelation
+from .forms import CustomUserCreationForm
 from itertools import chain
 from operator import attrgetter
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
-from django.contrib import messages
-
 def register(request):
+    """
+    Gère l'inscription d'un nouvel utilisateur : vérifie la disponibilité du nom d'utilisateur
+    et la correspondance des mots de passe, puis crée l'utilisateur.
+    """
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
 
-        # name exist?
         if User.objects.filter(username=username).exists():
             messages.error(request, "Ce nom d'utilisateur est déjà pris.")
             return redirect('register')
 
-        # password is ok ?
         if password != password2:
             messages.error(request, "Les mots de passe ne correspondent pas.")
             return redirect('register')
 
-        # create user
         user = User.objects.create_user(username=username, password=password)
         user.save()
 
@@ -47,30 +38,33 @@ def register(request):
 
     return render(request, 'register.html')
 
+
 def deconnexion_view(request):
+    """
+    Déconnecte l'utilisateur et le redirige vers la page de connexion.
+    """
     logout(request)
     return redirect('login')
 
+
 @login_required
 def user_feed(request):
-    # IDs des utilisateurs suivis + soi-même
+    """
+    Affiche le flux personnalisé de l'utilisateur contenant les tickets 
+    et les critiques des utilisateurs suivis.
+    """
     followed_users_ids = list(
         UserFollows.objects.filter(user=request.user).values_list('followed_user', flat=True)
     )
     followed_users_ids.append(request.user.id)
 
-    # Récupérer tous les tickets des utilisateurs suivis
     tickets = Ticket.objects.filter(user__in=followed_users_ids).order_by('-time_created')
-
-    # Récupérer toutes les critiques liées à ces tickets
     reviews = Review.objects.filter(ticket__in=tickets).order_by('-time_created')
 
-    # Créer un dictionnaire {ticket_id: [liste de reviews]}
     reviews_dict = {}
     for review in reviews:
         reviews_dict.setdefault(review.ticket_id, []).append(review)
 
-    # Préparer une liste combinée {ticket, reviews}
     tickets_with_reviews = []
     for ticket in tickets:
         tickets_with_reviews.append({
@@ -84,9 +78,12 @@ def user_feed(request):
 
     return render(request, 'user_feed.html', context)
 
+
 @login_required
 def create_review(request, ticket_id):
-    
+    """
+    Permet à un utilisateur de créer une critique liée à un ticket existant.
+    """
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == 'POST':
@@ -94,7 +91,6 @@ def create_review(request, ticket_id):
         body = request.POST.get('body')
         rating = request.POST.get('rating')
 
-        # create review/critique
         Review.objects.create(
             headline=headline,
             body=body,
@@ -103,7 +99,6 @@ def create_review(request, ticket_id):
             ticket=ticket
         )
 
-        # Confirmer via un message
         return render(request, 'create_review.html', {
             'ticket': ticket,
             'message': 'Vous avez ajouté une critique à ce ticket.'
@@ -111,71 +106,69 @@ def create_review(request, ticket_id):
 
     return render(request, 'create_review.html', {'ticket': ticket})
 
+
 @login_required
 def edit_ticket(request, ticket_id):
-    # Récupérer le billet à éditer, appartenant à l'utilisateur connecté
+    """
+    Permet à l'utilisateur de modifier l'un de ses tickets existants.
+    """
     ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
 
     if request.method == 'POST':
-        # Mise à jour des champs
         ticket.title = request.POST.get('ticket_title', ticket.title)
         ticket.description = request.POST.get('ticket_description', ticket.description)
 
-        # Si une image est téléchargée
         if 'ticket_image' in request.FILES:
             ticket.image = request.FILES['ticket_image']
 
         ticket.save()
-        return redirect('all_tickets')  # Redirige après édition
+        return redirect('all_tickets')
 
     return render(request, 'edit_ticket.html', {'ticket': ticket})
 
 
 @login_required
 def edit_review(request, review_id):
-    # Récupérer la revue à modifier
+    """
+    Permet à l'utilisateur de modifier une critique existante.
+    """
     review = get_object_or_404(Review, id=review_id)
 
     if request.method == 'POST':
-        # Récupérer les données du formulaire
-        headline = request.POST.get('headline')
-        body = request.POST.get('body')
-        rating = request.POST.get('rating')
-
-        # Mettre à jour la revue
-        review.headline = headline
-        review.body = body
-        review.rating = rating
+        review.headline = request.POST.get('headline')
+        review.body = request.POST.get('body')
+        review.rating = request.POST.get('rating')
         review.save()
 
-        # Rediriger vers la page des reviews du ticket après mise à jour
         return redirect('user_feed')
     
     return render(request, 'edit_review.html', {'review': review})
 
-from django.shortcuts import render
-
 
 @login_required
 def delete_ticket(request, ticket_id):
+    """
+    Supprime un ticket après confirmation de l'utilisateur.
+    """
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == 'POST' and request.POST.get('confirm_delete') == 'true':
-        # Supprimer le ticket
         ticket.delete()
-        return redirect('all_tickets')  # Redirection vers page principale
+        return redirect('all_tickets')
 
     return render(request, 'confirm_delete_ticket.html', {'ticket': ticket})
 
+
 @login_required
 def create_ticket(request):
+    """
+    Permet à l'utilisateur de créer un nouveau ticket.
+    """
     if request.method == 'POST':
-        # Si le formulaire est soumis
         title = request.POST.get('title')
         description = request.POST.get('description')
-        image = request.FILES.get('image')  # Récupérer l'image téléchargée
+        image = request.FILES.get('image')
 
-        # Créer un nouveau ticket
         ticket = Ticket.objects.create(
             title=title,
             description=description,
@@ -183,24 +176,24 @@ def create_ticket(request):
             image=image
         )
 
-        # Rediriger vers la page de la review du ticket créé
         return redirect('create_review', ticket_id=ticket.id)
 
     return render(request, 'create_ticket.html')
 
+
 @login_required
 def confirm_delete_review(request, review_id):
+    """
+    Affiche une page de confirmation pour supprimer une critique.
+    """
     review = get_object_or_404(Review, id=review_id)
 
-    # Vérifie si l'utilisateur est celui qui a écrit la review
     if review.user != request.user:
         return HttpResponseForbidden("Vous ne pouvez pas supprimer cette critique.")
 
-    # Si c'est une requête GET, on affiche la confirmation
     if request.method == 'GET':
         return render(request, 'confirm_delete_review.html', {'review': review})
 
-    # Si la requête est une POST, on supprime la review
     elif request.method == 'POST':
         review.delete()
         return redirect('user_feed')
@@ -208,32 +201,33 @@ def confirm_delete_review(request, review_id):
 
 @login_required
 def confirm_delete_ticket(request, ticket_id):
+    """
+    Affiche une page de confirmation pour supprimer un ticket.
+    """
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    print("ticket.user:", ticket.user)
-    print("request.user:", ticket.user)
-    print("Égalité :", ticket.user == request.user)
 
-    # Vérifie si l'utilisateur est celui qui a écrit la review
     if ticket.user != request.user:
-        return HttpResponseForbidden("Vous ne pouvez pas supprimer cette critique.")
+        return HttpResponseForbidden("Vous ne pouvez pas supprimer ce ticket.")
 
-    # Si c'est une requête GET, on affiche la confirmation
     if request.method == 'GET':
         return render(request, 'confirm_delete_ticket.html', {'ticket': ticket})
 
-    # Si la requête est une POST, on supprime la review
     elif request.method == 'POST':
         ticket.delete()
         return redirect('user_feed')
 
+
 @login_required
 def all_tickets_view(request):
+    """
+    Affiche tous les tickets avec pagination, triés soit par date, soit par utilisateur.
+    """
     order = request.GET.get('order', 'date')
 
     if order == 'user':
-        tickets = Ticket.objects.all().order_by('user__username', '-time_created')  # Tri par utilisateur, puis par date
+        tickets = Ticket.objects.all().order_by('user__username', '-time_created')
     else:
-        tickets = Ticket.objects.all().order_by('-time_created')  # Tri par défaut : antichronologique
+        tickets = Ticket.objects.all().order_by('-time_created')
 
     paginator = Paginator(tickets, 5)
     page_number = request.GET.get('page')
@@ -243,30 +237,40 @@ def all_tickets_view(request):
         'page_obj': page_obj,
     })
 
+
 @login_required
 def block_user_view(request, user_id):
-    if request.method == 'POST':
-        user_to_block = get_object_or_404(User, id=user_id)
-        BlockRelation.objects.get_or_create(blocker=request.user, blocked=user_to_block)
+    """
+    Bloque un utilisateur spécifié s'il n'est pas déjà bloqué.
+    """
+    user_to_block = get_object_or_404(User, id=user_id)
+
+    if not BlockRelation.objects.filter(blocker=request.user, blocked=user_to_block).exists():
+        BlockRelation.objects.create(blocker=request.user, blocked=user_to_block)
         messages.success(request, f"{user_to_block.username} a été bloqué.")
+    else:
+        messages.warning(request, f"{user_to_block.username} est déjà bloqué.")
+
     return redirect('follow_user')
+
 
 @login_required
 def follow_user_view(request):
-    # Récupérer les utilisateurs suivis (followed_user) et les abonnés (user)
+    """
+    Gère le système de suivi et désabonnement d'autres utilisateurs, 
+    ainsi que l'affichage des abonnements et des abonnés.
+    """
     followed_users = request.user.following.all().values_list('followed_user', flat=True)
     followers = request.user.followed_by.all().values_list('user', flat=True)
 
     followed_users = User.objects.filter(id__in=followed_users)
     followers = User.objects.filter(id__in=followers)
-
     followers = followers.exclude(id__isnull=True)
 
     blocked_users_ids = list(
         BlockRelation.objects.filter(blocker=request.user).values_list('blocked_id', flat=True)
     )
 
-    # Traiter l'ajout d'un utilisateur à la liste des abonnements
     if request.method == 'POST':
         if 'follow' in request.POST:
             followed_user_id = request.POST.get('followed_user')
@@ -281,42 +285,10 @@ def follow_user_view(request):
 
         elif 'unfollow' in request.POST:
             followed_user_id = request.POST.get('followed_user_id')
-            
             try:
-                followed_user = User.objects.get(id=followed_user_id)  # Récupérer l'utilisateur à désabonner
-                # Supprimer la relation d'abonnement
+                followed_user = User.objects.get(id=followed_user_id)
                 UserFollows.objects.filter(user=request.user, followed_user=followed_user).delete()
                 messages.success(request, f"Vous vous êtes désabonné de {followed_user.username}.")
             except User.DoesNotExist:
                 messages.error(request, "Utilisateur introuvable.")
-            
-            return redirect('follow_user')
-
-    # Contexte
-    context = {
-        'followed_users': followed_users,
-        'followers': followers,
-        'blocked_users_ids': blocked_users_ids,
-        'users': User.objects.exclude(id=request.user.id),  # Exclure l'utilisateur connecté de la liste des utilisateurs
-    }
-    return render(request, 'follow_user.html', context)
-
-@login_required
-def confirm_block_user_view(request, user_id):
-    user_to_block = get_object_or_404(User, id=user_id)
-    return render(request, 'confirm_block_user.html', {'user_to_block': user_to_block})
-
-@login_required
-def block_user_view(request, user_id):
-    user_to_block = get_object_or_404(User, id=user_id)
-
-    # Vérifie si l'utilisateur n'est pas déjà bloqué
-    if not BlockRelation.objects.filter(blocker=request.user, blocked=user_to_block).exists():
-        # Crée une relation de blocage
-        BlockRelation.objects.create(blocker=request.user, blocked=user_to_block)
-        messages.success(request, f"{user_to_block.username} a été bloqué.")
-    else:
-        messages.warning(request, f"{user_to_block.username} est déjà bloqué.")
-
-    # Rediriger vers la page des abonnements après le blocage
-    return redirect('follow_user')
+            return redirect('follow_user

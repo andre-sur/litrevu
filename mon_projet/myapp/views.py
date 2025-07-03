@@ -216,18 +216,18 @@ def confirm_delete_ticket(request, ticket_id):
         ticket.delete()
         return redirect('user_feed')
 
-
 @login_required
 def all_tickets_view(request):
     """
-    Affiche tous les tickets avec pagination, triés soit par date, soit par utilisateur.
+    Affiche uniquement les tickets créés par l'utilisateur connecté, avec pagination.
+    Permet un tri par date ou par nom d'utilisateur (bien que ce dernier sera inutile ici).
     """
     order = request.GET.get('order', 'date')
 
     if order == 'user':
-        tickets = Ticket.objects.all().order_by('user__username', '-time_created')
+        tickets = Ticket.objects.filter(user=request.user).order_by('user__username', '-time_created')
     else:
-        tickets = Ticket.objects.all().order_by('-time_created')
+        tickets = Ticket.objects.filter(user=request.user).order_by('-time_created')
 
     paginator = Paginator(tickets, 5)
     page_number = request.GET.get('page')
@@ -236,6 +236,7 @@ def all_tickets_view(request):
     return render(request, 'all_tickets.html', {
         'page_obj': page_obj,
     })
+
 
 
 @login_required
@@ -291,4 +292,4 @@ def follow_user_view(request):
                 messages.success(request, f"Vous vous êtes désabonné de {followed_user.username}.")
             except User.DoesNotExist:
                 messages.error(request, "Utilisateur introuvable.")
-            return redirect('follow_user
+            return redirect('follow_user')

@@ -6,18 +6,10 @@
     <a href="{% url 'create_ticket' %}" class="btn-ticket">Ajouter un ticket</a>
   </div>
 
-  <i>Vous pouvez modifier et supprimer les tickets et critiques dont vous en êtes l'auteur.<br> Créer un nouveau ticket implique la création automatique d'une critique.</i>
+  <i>Vous pouvez modifier et supprimer les tickets et critiques dont vous êtes l'auteur.<br>Créer un nouveau ticket implique la création automatique d'une critique.</i>
   
-  <h2>Tickets suivis par l'utilisateur</h2>
+  <h2>Mes tickets</h2>
 
-  <!-- Menu déroulant pour choisir l'ordre d'affichage -->
-  <form method="get">
-    <label for="order">Trier par :</label>
-    <select name="order" id="order" onchange="this.form.submit()">
-      <option value="date" {% if request.GET.order == "date" or not request.GET.order %}selected{% endif %}>Date (plus récents en premier)</option>
-      <option value="user" {% if request.GET.order == "user" %}selected{% endif %}>Nom d'utilisateur (ordre alphabétique)</option>
-    </select>
-  </form>
   <br>
 
   <div class="ticket-list">
@@ -40,40 +32,36 @@
 
         <!-- 🔘 Boutons associés au ticket -->
         <div class="ticket-buttons" style="margin: 10px 0;">
-          <!-- Bouton "Ajouter une critique visible pour tout le monde -->
           <form action="{% url 'create_review' ticket.id %}" method="get" style="display: inline;">
             <button type="submit" class="button">Ajouter une critique</button>
           </form>
 
-          {% if ticket.user == request.user %}
-            <!-- Seul le créateur peut modifier ou supprimer -->
-            <form action="{% url 'edit_ticket' ticket.id %}" method="get" style="display: inline;">
-              <button type="submit" class="button">Modifier ce ticket</button>
-            </form>
+          <form action="{% url 'edit_ticket' ticket.id %}" method="get" style="display: inline;">
+            <button type="submit" class="button">Modifier ce ticket</button>
+          </form>
 
-            <form action="{% url 'confirm_delete_ticket' ticket.id %}" method="get" style="display: inline;">
-              {% csrf_token %}
-              <button type="submit" class="button">Supprimer ce ticket</button>
-            </form>
-          {% endif %}
+          <form action="{% url 'confirm_delete_ticket' ticket.id %}" method="get" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="button">Supprimer ce ticket</button>
+          </form>
         </div>
 
         <!-- Affichage des reviews -->
         <div class="reviews">
           {% for review in ticket.review_set.all %}
-            <div class="review small-text">
-              <hr class="review-separator">
-              <p><strong>{{ review.headline }} ({{ review.user.username }})</strong></p>
+            {% if review.user == request.user %}
+              <div class="review small-text">
+                <hr class="review-separator">
+                <p><strong>{{ review.headline }} ({{ review.user.username }})</strong></p>
 
-              <div class="review-description-box">
-                {{ review.body }}
-              </div>
+                <div class="review-description-box">
+                  {{ review.body }}
+                </div>
 
-              <p><strong>Note :</strong> {{ review.rating }} / 5</p>
-              <p><strong>Publié le :</strong> {{ review.time_created }}</p>
+                <p><strong>Note :</strong> {{ review.rating }} / 5</p>
+                <p><strong>Publié le :</strong> {{ review.time_created }}</p>
 
-              <div class="review-buttons">
-                {% if review.user == request.user %}
+                <div class="review-buttons">
                   <form action="{% url 'edit_review' review.id %}" method="get" style="display: inline;">
                     <button type="submit" class="button">Modifier</button>
                   </form>
@@ -81,16 +69,16 @@
                     {% csrf_token %}
                     <button type="submit" class="button">Effacer</button>
                   </form>
-                {% endif %}
+                </div>
               </div>
-            </div>
+            {% endif %}
           {% empty %}
             <p>Aucune review pour ce ticket.</p>
           {% endfor %}
         </div>
       </div>
     {% empty %}
-      <p>Aucun ticket suivi.</p>
+      <p>Vous n'avez encore publié aucun ticket.</p>
     {% endfor %}
   </div>
 

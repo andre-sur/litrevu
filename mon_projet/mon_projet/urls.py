@@ -39,7 +39,7 @@ urlpatterns = [
     path('create_ticket/', views.create_ticket, name='create_ticket'),
     path('all_tickets/', views.all_tickets_view, name='all_tickets'),
     path('block_user/<int:user_id>/', views.block_user_view, name='block_user'),
-    path('confirm_block_user/<int:user_id>/', views.confirm_block_user_view, name='confirm_block_user'),
+    path('confirm_block_user/<int:user_id>/', views.block_user_view, name='confirm_block_user'),
 
 ]
 

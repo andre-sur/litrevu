@@ -79,17 +79,36 @@ def user_feed(request):
     return render(request, 'user_feed.html', context)
 
 
+from django.contrib import messages
+from django.shortcuts import redirect
+
 @login_required
 def create_review(request, ticket_id):
     """
-    Permet à un utilisateur de créer une critique liée à un ticket existant.
+    Permet à un utilisateur de créer une critique liée à un ticket existant,
+    sauf s'il en a déjà écrit une pour ce ticket.
     """
     ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    # Vérifie si l'utilisateur a déjà écrit une review pour ce ticket
+    if Review.objects.filter(ticket=ticket, user=request.user).exists():
+        messages.error(request, "Vous avez déjà écrit une critique pour ce ticket.")
+        return redirect('user_feed')
 
     if request.method == 'POST':
         headline = request.POST.get('headline')
         body = request.POST.get('body')
         rating = request.POST.get('rating')
+
+        # Validation simple du champ rating
+        try:
+            rating = int(rating)
+            if not (0 <= rating <= 5):
+                messages.error(request, "La note doit être comprise entre 0 et 5.")
+                return render(request, 'create_review.html', {'ticket': ticket})
+        except ValueError:
+            messages.error(request, "La note doit être un nombre entier.")
+            return render(request, 'create_review.html', {'ticket': ticket})
 
         Review.objects.create(
             headline=headline,
@@ -99,13 +118,10 @@ def create_review(request, ticket_id):
             ticket=ticket
         )
 
-        return render(request, 'create_review.html', {
-            'ticket': ticket,
-            'message': 'Vous avez ajouté une critique à ce ticket.'
-        })
+        messages.success(request, "Votre critique a été enregistrée.")
+        return redirect('user_feed')
 
     return render(request, 'create_review.html', {'ticket': ticket})
-
 
 @login_required
 def edit_ticket(request, ticket_id):
@@ -127,17 +143,37 @@ def edit_ticket(request, ticket_id):
     return render(request, 'edit_ticket.html', {'ticket': ticket})
 
 
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
+from .models import Review
+
 @login_required
 def edit_review(request, review_id):
     """
-    Permet à l'utilisateur de modifier une critique existante.
+    Permet à l'utilisateur de modifier une critique existante,
+    avec validation du champ rating (entre 0 et 5).
     """
     review = get_object_or_404(Review, id=review_id)
 
     if request.method == 'POST':
-        review.headline = request.POST.get('headline')
-        review.body = request.POST.get('body')
-        review.rating = request.POST.get('rating')
+        headline = request.POST.get('headline')
+        body = request.POST.get('body')
+        rating = request.POST.get('rating')
+
+        try:
+            rating = int(rating)
+            if rating < 0 or rating > 5:
+                raise ValueError
+        except (ValueError, TypeError):
+            return render(request, 'edit_review.html', {
+                'review': review,
+                'message': "La note doit être un nombre entier entre 0 et 5."
+            })
+
+        review.headline = headline
+        review.body = body
+        review.rating = rating
         review.save()
 
         return redirect('user_feed')
@@ -160,7 +196,7 @@ def delete_ticket(request, ticket_id):
 
 
 @login_required
-def create_ticket(request):
+def create_ticket_and_review(request):
     """
     Permet à l'utilisateur de créer un nouveau ticket.
     """
@@ -180,6 +216,27 @@ def create_ticket(request):
 
     return render(request, 'create_ticket.html')
 
+@login_required
+def create_ticket(request):
+    """
+    Permet à un utilisateur de créer un ticket seul, 
+    puis redirige vers le fil d'actualité.
+    """
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        image = request.FILES.get('image')
+
+        Ticket.objects.create(
+            title=title,
+            description=description,
+            image=image,
+            user=request.user
+        )
+
+        return redirect('user_feed')
+
+    return render(request, 'create_ticket.html')
 
 @login_required
 def confirm_delete_review(request, review_id):
@@ -219,15 +276,9 @@ def confirm_delete_ticket(request, ticket_id):
 @login_required
 def all_tickets_view(request):
     """
-    Affiche uniquement les tickets créés par l'utilisateur connecté, avec pagination.
-    Permet un tri par date ou par nom d'utilisateur (bien que ce dernier sera inutile ici).
+    Affiche uniquement les tickets créés par l'utilisateur connecté, triés par date décroissante avec pagination.
     """
-    order = request.GET.get('order', 'date')
-
-    if order == 'user':
-        tickets = Ticket.objects.filter(user=request.user).order_by('user__username', '-time_created')
-    else:
-        tickets = Ticket.objects.filter(user=request.user).order_by('-time_created')
+    tickets = Ticket.objects.filter(user=request.user).order_by('-time_created')
 
     paginator = Paginator(tickets, 5)
     page_number = request.GET.get('page')
@@ -236,6 +287,7 @@ def all_tickets_view(request):
     return render(request, 'all_tickets.html', {
         'page_obj': page_obj,
     })
+
 
 
 
@@ -255,33 +307,36 @@ def block_user_view(request, user_id):
     return redirect('follow_user')
 
 
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.contrib.auth.models import User
+
 @login_required
 def follow_user_view(request):
-    """
-    Gère le système de suivi et désabonnement d'autres utilisateurs, 
-    ainsi que l'affichage des abonnements et des abonnés.
-    """
+    # Récupérer les utilisateurs déjà suivis
     followed_users = request.user.following.all().values_list('followed_user', flat=True)
     followers = request.user.followed_by.all().values_list('user', flat=True)
 
-    followed_users = User.objects.filter(id__in=followed_users)
-    followers = User.objects.filter(id__in=followers)
-    followers = followers.exclude(id__isnull=True)
+    followed_users_qs = User.objects.filter(id__in=followed_users)
+    followers_qs = User.objects.filter(id__in=followers).exclude(id__isnull=True)
 
-    blocked_users_ids = list(
-        BlockRelation.objects.filter(blocker=request.user).values_list('blocked_id', flat=True)
-    )
+    blocked_users_ids = list(BlockRelation.objects.filter(blocker=request.user).values_list('blocked_id', flat=True))
+
+    # Utilisateurs que l'on peut suivre : tous sauf soi-même et ceux déjà suivis
+    users = User.objects.exclude(id__in=followed_users).exclude(id=request.user.id)
 
     if request.method == 'POST':
         if 'follow' in request.POST:
             followed_user_id = request.POST.get('followed_user')
-            followed_user = User.objects.get(id=followed_user_id)
-
-            if not UserFollows.objects.filter(user=request.user, followed_user=followed_user).exists():
-                UserFollows.objects.create(user=request.user, followed_user=followed_user)
-                messages.success(request, f"Vous suivez maintenant {followed_user.username}.")
-            else:
-                messages.warning(request, "Vous suivez déjà cet utilisateur.")
+            try:
+                followed_user = User.objects.get(id=followed_user_id)
+                if not UserFollows.objects.filter(user=request.user, followed_user=followed_user).exists():
+                    UserFollows.objects.create(user=request.user, followed_user=followed_user)
+                    messages.success(request, f"Vous suivez maintenant {followed_user.username}.")
+                else:
+                    messages.warning(request, "Vous suivez déjà cet utilisateur.")
+            except User.DoesNotExist:
+                messages.error(request, "Utilisateur introuvable.")
             return redirect('follow_user')
 
         elif 'unfollow' in request.POST:
@@ -293,3 +348,10 @@ def follow_user_view(request):
             except User.DoesNotExist:
                 messages.error(request, "Utilisateur introuvable.")
             return redirect('follow_user')
+
+    return render(request, 'follow_user.html', {
+        'followed_users': followed_users_qs,
+        'followers': followers_qs,
+        'blocked_users_ids': blocked_users_ids,
+        'users': users,
+    })

@@ -27,7 +27,7 @@
             background-color: #333;
             color: white;
         }
-        /* Ajouté pour centrer "LITRevu" */
+        /* Centrer "LITRevu" */
         .header .center {
             flex: 1;
             text-align: center;
@@ -45,48 +45,84 @@
         .header .links a:hover {
             text-decoration: underline;
         }
-        /* Pour les messages dynamiques */
+        /* Messages Django en popup simple */
+        #messages-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            min-width: 250px;
+        }
         .message {
-            color: #ff5733;  /* Couleur orange pour les messages */
+            background-color: #eee;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             font-weight: bold;
-            margin-right: 20px;
+            text-align: center;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <!-- Message dynamique à gauche -->
-        <div class="message">{{ message }}</div>
-        <div class="message">
+        <div>
             {% if request.user.is_authenticated %}
                 <span class="username">Connecté : {{ request.user.username }}</span>
             {% endif %}
         </div>
 
-        <!-- "litrev" centré -->
         <div class="center">LITRevu</div>
 
-        <!-- Liens à droite -->
         <div class="links">
             <a href="{% url 'user_feed' %}">Flux</a>
             <a href="{% url 'all_tickets' %}">Posts</a>
             <a href="{% url 'follow_user' %}">Abonnements</a>
-            <form action="{% url 'logout' %}" method="post">
+            <form action="{% url 'logout' %}" method="post" style="margin-left: 10px;">
                 {% csrf_token %}
                 <button type="submit">Se déconnecter</button>
             </form>
         </div>
     </div>
 
+    <!-- Affichage des messages Django -->
+    {% if messages %}
+        <div id="messages-container">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <!-- Contenu principal de la page -->
     <div class="content">
         {% block content %}
-        <!-- Ici, le contenu spécifique à chaque page sera injecté -->
         {% endblock %}
     </div>
 
     <!-- Inclusion du script JS pour interagir avec les détails des revues -->
     <script src="{% static 'js/toggle_review_details.js' %}"></script>
+
+    <script>
+      // Disparition automatique des messages après 3 secondes
+      setTimeout(() => {
+        const container = document.getElementById('messages-container');
+        if(container) {
+          container.style.display = 'none';
+        }
+      }, 3000);
+    </script>
 </body>
 </html>

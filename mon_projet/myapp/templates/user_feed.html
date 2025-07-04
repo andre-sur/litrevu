@@ -1,39 +1,97 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Fil d'actualités</h1>
+  <!-- Boutons dupliqués en haut -->
+  <div style="margin-bottom: 20px;">
+    <a href="{% url 'create_ticket' %}" class="btn-ticket" style="margin-right: 10px;">Ajouter un ticket</a>
+    <a href="{% url 'create_ticket_and_review' %}" class="btn-ticket">Ajouter ticket + critique</a>
+  </div>
 
-    <div>
-        {% if tickets_with_reviews %}
-            {% for item in tickets_with_reviews %}
-                <div class="ticket">
-                    <h3>{{ item.ticket.title }} ({{ item.ticket.user.username }})</h3>
-                    <p>{{ item.ticket.description }}</p>
-                    <p><small>Publié le : {{ item.ticket.time_created|date:"d/m/Y H:i" }}</small></p>
+  <h2>Mes tickets</h2>
+  <br>
 
-                    {% if item.ticket.image %}
-                        <div class="ticket-image">
-                            <img src="{{ item.ticket.image.url }}" alt="Image du ticket" style="max-width: 20%; height: auto;">
-                        </div>
-                    {% endif %}
+  <div class="ticket-list">
+    {% for item in tickets_with_reviews %}
+      {% with ticket=item.ticket reviews=item.reviews %}
+        <div class="ticket">
+          <h3>
+            {{ ticket.title }}
+            <small>({{ ticket.user.username }} – {{ ticket.time_created|date:"d/m/Y H:i" }})</small>
+          </h3>
 
-                    <h4>Critiques :</h4>
-                    {% if item.reviews %}
-                        {% for review in item.reviews %}
-                            <div class="review small-text">
-                                <p><strong>{{ review.user.username }}</strong> a écrit :</p>
-                                <p>{{ review.body }}</p>
-                                <p>Note : {{ review.rating }}/5</p>
-                                <p><small>Publié le : {{ review.time_created|date:"d/m/Y H:i" }}</small></p>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="review small-text">Aucune critique pour ce billet.</div>
-                    {% endif %}
+          {% if ticket.image %}
+            <div class="ticket-image">
+              <img src="{{ ticket.image.url }}" alt="Image du ticket"
+                   style="max-width: 200px; max-height: 150px; object-fit: cover;">
+            </div>
+          {% endif %}
+
+          <div class="ticket-description-box">
+            <p class="ticket-description">{{ ticket.description }}</p>
+          </div>
+
+          <div class="ticket-buttons" style="margin: 10px 0;">
+            <form action="{% url 'create_review' ticket.id %}" method="get" style="display: inline;">
+              <button type="submit" class="button">Ajouter une critique</button>
+            </form>
+            <form action="{% url 'edit_ticket' ticket.id %}" method="get" style="display: inline;">
+              <button type="submit" class="button">Modifier ce ticket</button>
+            </form>
+            <form action="{% url 'confirm_delete_ticket' ticket.id %}" method="get" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="button">Supprimer ce ticket</button>
+            </form>
+          </div>
+
+          <div class="reviews">
+            {% if reviews %}
+              {% for review in reviews %}
+                <div class="review small-text">
+                  <hr class="review-separator">
+                  <p><strong>{{ review.headline }} ({{ review.user.username }})</strong></p>
+                  <div class="review-description-box">
+                    {{ review.body }}
+                  </div>
+                  <p><strong>Note :</strong> {{ review.rating }} / 5</p>
+                  <p><strong>Publié le :</strong> {{ review.time_created|date:"d/m/Y H:i" }}</strong></p>
+                  {% if review.user == request.user %}
+                    <div class="review-buttons">
+                      <form action="{% url 'edit_review' review.id %}" method="get" style="display: inline;">
+                        <button type="submit" class="button">Modifier</button>
+                      </form>
+                      <form action="{% url 'confirm_delete_review' review.id %}" method="get" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="button">Effacer</button>
+                      </form>
+                    </div>
+                  {% endif %}
                 </div>
-            {% endfor %}
-        {% else %}
-            <p>Aucun billet à afficher.</p>
-        {% endif %}
-    </div>
+              {% endfor %}
+            {% else %}
+              <p>Aucune review pour ce ticket.</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endwith %}
+    {% empty %}
+      <p>Vous n'avez encore publié aucun ticket.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <span class="step-links">
+      {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; Première</a>
+        <a href="?page={{ page_obj.previous_page_number }}">Précédente</a>
+      {% endif %}
+      <span class="current">
+        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}.
+      </span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Suivante</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Dernière &raquo;</a>
+      {% endif %}
+    </span>
+  </div>
 {% endblock %}

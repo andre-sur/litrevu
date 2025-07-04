@@ -28,3 +28,14 @@ source env/bin/activate
 
 # Étape 3 : Installer les dépendances via requirements.txt
 pip install -r requirements.txt
+
+# Étape 4 : Lancez l'application
+dans le Terminal : python manage.py runserver
+
+# Étape 5 : Ouvrez dans un navigateur la page (et entrez login et mot de passe)
+http://localhost:8000/accounts/login/
+
+Autre information pour les développeurs:
+Voir les docstrings pour les fonctions
+Accès direct à la base de données
+http://localhost:8000/admin
